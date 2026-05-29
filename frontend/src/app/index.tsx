@@ -1,98 +1,115 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Colors } from '../constants/theme';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function LoginScreen() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+  const handleLogin = (role: 'admin' | 'staff' | 'customer') => {
+    // Dummy login logic based on role button pressed for demo purposes
+    if (role === 'admin') router.push('/admin/dashboard');
+    if (role === 'staff') router.push('/staff/dashboard');
+    if (role === 'customer') router.push('/customer/dashboard');
+  };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      padding: 20,
+      backgroundColor: theme.background,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: theme.primary,
+      textAlign: 'center',
+      marginBottom: 30,
+    },
+    input: {
+      backgroundColor: theme.surface,
+      borderColor: theme.border,
+      borderWidth: 1,
+      borderRadius: 8,
+      padding: 15,
+      marginBottom: 15,
+      color: theme.text,
+      fontSize: 16,
+    },
+    button: {
+      backgroundColor: theme.primary,
+      padding: 15,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginBottom: 15,
+    },
+    buttonText: {
+      color: theme.textInverse,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    secondaryButton: {
+      backgroundColor: theme.secondary,
+      padding: 15,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginBottom: 15,
+    },
+    roleContainer: {
+      marginTop: 20,
+      paddingTop: 20,
+      borderTopWidth: 1,
+      borderColor: theme.border,
+    },
+    subtitle: {
+      fontSize: 16,
+      color: theme.text,
+      textAlign: 'center',
+      marginBottom: 15,
+    }
+  });
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <View style={styles.container}>
+      <Text style={styles.title}>Smart Supermarket</Text>
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor={theme.text + '80'}
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor={theme.text + '80'}
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+
+      <TouchableOpacity style={styles.button} onPress={() => handleLogin('customer')}>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+
+      <View style={styles.roleContainer}>
+        <Text style={styles.subtitle}>Demo Quick Login:</Text>
+        <TouchableOpacity style={styles.secondaryButton} onPress={() => handleLogin('admin')}>
+          <Text style={styles.buttonText}>Login as Admin</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.secondaryButton} onPress={() => handleLogin('staff')}>
+          <Text style={styles.buttonText}>Login as Staff</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
-
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
