@@ -35,6 +35,10 @@ const UserSchema = new mongoose.Schema({
   storeQR: {
     type: String,
   },
+  storeId: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+  },
   createdAt: {
     type: Date,
     default: Date.now,
