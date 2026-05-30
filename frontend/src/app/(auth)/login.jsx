@@ -28,9 +28,9 @@ export default function LoginScreen() {
       if (data.success) {
         await login(data.data);
         const role = data.data.role;
-        if (role === 'admin') router.replace('/(admin)');
-        else if (role === 'staff') router.replace('/(staff)');
-        else router.replace('/(customer)');
+        if (role === 'admin') router.replace('/(admin)/index');
+        else if (role === 'staff') router.replace('/(staff)/index');
+        else router.replace('/(customer)/index');
       } else {
         setError(data.message || 'Login failed');
       }
