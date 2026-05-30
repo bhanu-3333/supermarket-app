@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator,
+  View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
+
+const { width } = Dimensions.get('window');
 
 function StatCard({ label, value, sub, valueColor }) {
   return (
@@ -117,23 +119,46 @@ export default function AdminDashboard() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  content: { padding: 20, paddingBottom: 40 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, marginTop: 20 },
-  storeName: { fontSize: 26, fontWeight: 'bold', color: '#0A3B7C' },
+  content: { padding: width * 0.05, paddingBottom: 40 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, marginTop: 20, flexWrap: 'wrap' },
+  storeName: { fontSize: Math.min(width * 0.065, 26), fontWeight: 'bold', color: '#0A3B7C', maxWidth: '70%' },
   badge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f0f4f8', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22c55e', marginRight: 6 },
   badgeText: { fontSize: 12, fontWeight: '600', color: '#333' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 28 },
-  statCard: { width: '47%', backgroundColor: '#fff', borderRadius: 12, padding: 16, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: width * 0.03, marginBottom: 28 },
+  statCard: { 
+    width: width < 400 ? '100%' : '47%', 
+    backgroundColor: '#fff', 
+    borderRadius: 12, 
+    padding: 16, 
+    elevation: 2, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.06, 
+    shadowRadius: 4, 
+    shadowOffset: { width: 0, height: 2 } 
+  },
   statLabel: { fontSize: 12, color: '#666', marginBottom: 8 },
   statValue: { fontSize: 22, fontWeight: 'bold', color: '#111', marginBottom: 4 },
   statSub: { fontSize: 11, color: '#888' },
   sectionTitle: { fontSize: 20, fontWeight: '700', color: '#111', marginBottom: 14 },
-  orderCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
+  orderCard: { 
+    flexDirection: width < 400 ? 'column' : 'row', 
+    justifyContent: 'space-between', 
+    alignItems: width < 400 ? 'flex-start' : 'center', 
+    backgroundColor: '#fff', 
+    borderRadius: 12, 
+    padding: 16, 
+    marginBottom: 12, 
+    elevation: 2, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.06, 
+    shadowRadius: 4, 
+    shadowOffset: { width: 0, height: 2 } 
+  },
   orderIdLabel: { fontSize: 10, color: '#888' },
-  orderId: { fontSize: 12, color: '#333', fontWeight: '500', maxWidth: 180 },
+  orderId: { fontSize: 12, color: '#333', fontWeight: '500', maxWidth: width * 0.5 },
   orderDate: { fontSize: 11, color: '#aaa', marginTop: 4 },
-  orderRight: { alignItems: 'flex-end' },
+  orderRight: { alignItems: width < 400 ? 'flex-start' : 'flex-end', marginTop: width < 400 ? 12 : 0 },
   orderPrice: { fontSize: 20, fontWeight: 'bold', color: '#111' },
   orderWeight: { fontSize: 11, color: '#888', marginTop: 4 },
   emptyCard: { backgroundColor: '#f9f9f9', borderRadius: 12, padding: 24, alignItems: 'center' },
