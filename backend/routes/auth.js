@@ -40,6 +40,14 @@ router.post('/register-admin', async (req, res) => {
       storeQR,
     });
 
+    // Set storeId to self for admin (they own the store)
+    user.storeId = user._id;
+    await user.save();
+
+    // Set storeId to self for admin
+    user.storeId = user._id;
+    await user.save();
+
     res.status(201).json({
       success: true,
       data: {
