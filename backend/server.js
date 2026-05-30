@@ -17,10 +17,9 @@ app.use(express.json());
 // Enable CORS
 app.use(cors());
 
-// Mount routers (placeholders for now)
-app.get('/', (req, res) => {
-  res.send('Supermarket API is running...');
-});
+// Mount routers
+const authRouter = require('./routes/auth');
+app.use('/api/auth', authRouter);
 
 const PORT = process.env.PORT || 5000;
 
