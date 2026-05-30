@@ -9,7 +9,6 @@ const ProductSchema = new mongoose.Schema({
   barcode: {
     type: String,
     required: [true, 'Please add a barcode'],
-    unique: true,
   },
   category: {
     type: String,
@@ -44,6 +43,16 @@ const ProductSchema = new mongoose.Schema({
   productImage: {
     type: String,
     default: 'no-photo.jpg'
+  },
+  storeId: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  createdBy: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true
   },
   createdAt: {
     type: Date,
