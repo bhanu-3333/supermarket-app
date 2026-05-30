@@ -90,7 +90,7 @@ export default function LoginScreen() {
         </View>
         <TouchableOpacity
           style={styles.createAccountContainer}
-          onPress={() => router.push('/(auth)/register')}
+          onPress={() => router.push('/(auth)/account-type')}
         >
           <Text style={styles.createAccountText}>CREATE NEW ACCOUNT? SIGN UP</Text>
         </TouchableOpacity>
