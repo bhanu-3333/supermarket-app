@@ -26,6 +26,15 @@ const UserSchema = new mongoose.Schema({
     minlength: 6,
     select: false,
   },
+  storeName: {
+    type: String,
+  },
+  storeCode: {
+    type: String,
+  },
+  storeQR: {
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
