@@ -92,6 +92,53 @@ router.post('/login', async (req, res) => {
         email: user.email,
         role: user.role,
         storeCode: user.storeCode,
+        storeName: user.storeName,
+        token: generateToken(user._id),
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   POST /api/auth/register-customer
+// @desc    Register a customer with store code
+// @access  Public
+router.post('/register-customer', async (req, res) => {
+  try {
+    const { name, email, password, storeCode } = req.body;
+
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
+    }
+
+    // Find the store by store code
+    const store = await User.findOne({ storeCode, role: 'admin' });
+    if (!store) {
+      return res.status(400).json({ success: false, message: 'Invalid Store Code' });
+    }
+
+    user = await User.create({
+      name,
+      email,
+      password,
+      role: 'customer',
+      storeId: store._id,
+      storeName: store.storeName,
+      storeCode: store.storeCode,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        storeName: user.storeName,
+        storeCode: user.storeCode,
         token: generateToken(user._id),
       },
     });
