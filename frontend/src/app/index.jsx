@@ -13,9 +13,9 @@ export default function WelcomeScreen() {
 
   useEffect(() => {
     if (!loading && user) {
-      if (user.role === 'admin') router.replace('/(admin)');
-      else if (user.role === 'staff') router.replace('/(staff)');
-      else router.replace('/(customer)');
+      if (user.role === 'admin') router.replace('/(admin)/index');
+      else if (user.role === 'staff') router.replace('/(staff)/index');
+      else router.replace('/(customer)/index');
     }
   }, [user, loading]);
 
