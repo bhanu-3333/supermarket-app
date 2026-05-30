@@ -59,6 +59,24 @@ export default function AdminLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="staff-management"
+        options={{
+          tabBarButton: () => null,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarButton: () => null,
+        }}
+      />
+      <Tabs.Screen
+        name="identity-portal"
+        options={{
+          tabBarButton: () => null,
+        }}
+      />
     </Tabs>
   );
 }
