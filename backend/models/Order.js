@@ -30,6 +30,11 @@ const OrderSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  storeId: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
+    required: true
+  },
   orderItems: [OrderItemSchema],
   totalWeight: {
     type: Number,
