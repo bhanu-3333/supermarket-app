@@ -18,15 +18,32 @@ function StatCard({ label, value, sub, valueColor }) {
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
+  const [stats, setStats] = useState({
+    totalSalesMonth: 0,
+    totalSalesToday: 0,
+    totalCustomers: 0,
+    totalProducts: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const { data } = await api.get('/orders/recent', {
-          headers: { Authorization: `Bearer ${user?.token}` },
-        });
-        if (data.success) setOrders(data.data);
+        const [dashData, ordersData] = await Promise.all([
+          api.get('/admin/dashboard', {
+            headers: { Authorization: `Bearer ${user?.token}` },
+          }),
+          api.get('/orders/recent', {
+            headers: { Authorization: `Bearer ${user?.token}` },
+          })
+        ]);
+        
+        if (dashData.data.success) {
+          setStats(dashData.data.data);
+        }
+        if (ordersData.data.success) {
+          setOrders(ordersData.data.data);
+        }
       } catch (_) {}
       setLoading(false);
     })();
@@ -45,10 +62,28 @@ export default function AdminDashboard() {
 
       {/* Stats Grid */}
       <View style={styles.grid}>
-        <StatCard label="Total sales of the month" value="$4,000.85" sub="Increase 10% today" valueColor="#22c55e" />
-        <StatCard label="Total sales of the day" value="$40.85" sub="Decrease 10% today" valueColor="#ef4444" />
-        <StatCard label="Total Customer" value="142" sub="Check customers" />
-        <StatCard label="Total Stock" value="142" sub="Items in Inventory" />
+        <StatCard 
+          label="Total sales of the month" 
+          value={`$${stats.totalSalesMonth.toFixed(2)}`} 
+          sub="Monthly revenue" 
+          valueColor="#22c55e" 
+        />
+        <StatCard 
+          label="Total sales of the day" 
+          value={`$${stats.totalSalesToday.toFixed(2)}`} 
+          sub="Today's revenue" 
+          valueColor="#3b82f6" 
+        />
+        <StatCard 
+          label="Total Customer" 
+          value={stats.totalCustomers} 
+          sub="Registered customers" 
+        />
+        <StatCard 
+          label="Total Stock" 
+          value={stats.totalProducts} 
+          sub="Items in Inventory" 
+        />
       </View>
 
       {/* Recent Orders */}
