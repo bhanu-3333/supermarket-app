@@ -74,15 +74,23 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log('Login attempt for:', email);
+
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
+      console.log('User not found');
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
+    console.log('User found:', { id: user._id, role: user.role, storeId: user.storeId });
+
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
+      console.log('Password mismatch');
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
+
+    console.log('Login successful');
 
     res.status(200).json({
       success: true,
@@ -93,11 +101,12 @@ router.post('/login', async (req, res) => {
         role: user.role,
         storeCode: user.storeCode,
         storeName: user.storeName,
+        storeId: user.storeId,
         token: generateToken(user._id),
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error('Login error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
