@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from '../../components/Toast';
 
 const { width } = Dimensions.get('window');
 
@@ -26,6 +27,7 @@ export default function StaffManagement() {
   const [modalVisible, setModalVisible] = useState(false);
   const [newStaff, setNewStaff] = useState({ name: '', email: '', password: '' });
   const [creating, setCreating] = useState(false);
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
 
   useEffect(() => {
     fetchStaff();
@@ -62,18 +64,24 @@ export default function StaffManagement() {
 
     setCreating(true);
     try {
+      console.log('Creating staff with:', { name: newStaff.name, email: newStaff.email });
       const { data } = await api.post('/admin/staff', newStaff, {
         headers: { Authorization: `Bearer ${user?.token}` },
       });
 
+      console.log('Staff creation response:', data);
       if (data.success) {
-        Alert.alert('Success', 'Staff member created successfully');
+        setToast({ visible: true, message: 'Staff member created successfully', type: 'success' });
         setModalVisible(false);
         setNewStaff({ name: '', email: '', password: '' });
         fetchStaff();
+      } else {
+        setToast({ visible: true, message: data.message || 'Failed to create staff', type: 'error' });
       }
     } catch (err) {
-      Alert.alert('Error', err.response?.data?.message || 'Failed to create staff');
+      console.error('Staff creation error:', err);
+      console.error('Error response:', err.response?.data);
+      setToast({ visible: true, message: err.response?.data?.message || 'Failed to create staff', type: 'error' });
     } finally {
       setCreating(false);
     }
@@ -87,12 +95,17 @@ export default function StaffManagement() {
         style: 'destructive',
         onPress: async () => {
           try {
-            await api.delete(`/admin/staff/${staffId}`, {
+            console.log('Deleting staff:', staffId);
+            const { data } = await api.delete(`/admin/staff/${staffId}`, {
               headers: { Authorization: `Bearer ${user?.token}` },
             });
+            console.log('Delete response:', data);
+            setToast({ visible: true, message: 'Staff member deleted successfully', type: 'success' });
             fetchStaff();
           } catch (err) {
-            Alert.alert('Error', 'Failed to delete staff');
+            console.error('Delete error:', err);
+            console.error('Error response:', err.response?.data);
+            setToast({ visible: true, message: err.response?.data?.message || 'Failed to delete staff', type: 'error' });
           }
         },
       },
@@ -121,6 +134,12 @@ export default function StaffManagement() {
 
   return (
     <View style={styles.container}>
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onHide={() => setToast({ ...toast, visible: false })}
+      />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="chevron-back" size={24} color="#123F7A" />
