@@ -89,12 +89,16 @@ router.post('/staff', protect, authorize('admin'), async (req, res) => {
   try {
     const { name, email, password } = req.body;
     
+    console.log('Creating staff - Request body:', { name, email, password: '***' });
+    console.log('Admin user:', { id: req.user._id, storeId: req.user.storeId });
+    
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide all fields' });
     }
     
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('Email already exists:', email);
       return res.status(400).json({ success: false, message: 'Email already in use' });
     }
     
@@ -108,6 +112,8 @@ router.post('/staff', protect, authorize('admin'), async (req, res) => {
       storeCode: req.user.storeCode
     });
     
+    console.log('Staff created successfully:', staff._id);
+    
     res.status(201).json({ 
       success: true, 
       data: {
@@ -118,7 +124,8 @@ router.post('/staff', protect, authorize('admin'), async (req, res) => {
       }
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error creating staff:', err);
+    res.status(500).json({ success: false, message: err.message || 'Server error' });
   }
 });
 
@@ -127,25 +134,35 @@ router.post('/staff', protect, authorize('admin'), async (req, res) => {
 // @access  Private (Admin)
 router.delete('/staff/:id', protect, authorize('admin'), async (req, res) => {
   try {
+    console.log('Deleting staff - ID:', req.params.id);
+    console.log('Admin user:', { id: req.user._id, storeId: req.user.storeId });
+    
     const staff = await User.findById(req.params.id);
     
     if (!staff) {
+      console.log('Staff not found');
       return res.status(404).json({ success: false, message: 'Staff not found' });
     }
     
+    console.log('Found staff:', { id: staff._id, storeId: staff.storeId, role: staff.role });
+    
     if (staff.storeId.toString() !== req.user.storeId.toString()) {
+      console.log('Store ID mismatch');
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
     
     if (staff.role !== 'staff') {
+      console.log('Not a staff account');
       return res.status(400).json({ success: false, message: 'Can only delete staff accounts' });
     }
     
     await staff.deleteOne();
+    console.log('Staff deleted successfully');
     
     res.json({ success: true, message: 'Staff deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error deleting staff:', err);
+    res.status(500).json({ success: false, message: err.message || 'Server error' });
   }
 });
 
