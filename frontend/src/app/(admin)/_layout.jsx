@@ -1,10 +1,14 @@
 import { Tabs } from 'expo-router';
-import { Image } from 'react-native';
+import { Image, Platform } from 'react-native';
 
 const icon = (blue, white) => ({ focused }) => (
   <Image
     source={focused ? blue : white}
-    style={{ width: 24, height: 24, tintColor: focused ? undefined : '#888' }}
+    style={{ 
+      width: 24, 
+      height: 24, 
+      tintColor: focused ? undefined : '#888' 
+    }}
     resizeMode="contain"
   />
 );
@@ -16,7 +20,19 @@ export default function AdminLayout() {
         headerShown: false,
         tabBarActiveTintColor: '#123F7A',
         tabBarInactiveTintColor: '#888',
-        tabBarStyle: { height: 60, paddingBottom: 8 },
+        tabBarStyle: { 
+          height: Platform.OS === 'ios' ? 85 : 65,
+          paddingBottom: Platform.OS === 'ios' ? 25 : 8,
+          paddingTop: 8,
+          backgroundColor: '#fff',
+          borderTopWidth: 1,
+          borderTopColor: '#e0e0e0',
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+          marginTop: -4,
+        },
       }}
     >
       <Tabs.Screen
