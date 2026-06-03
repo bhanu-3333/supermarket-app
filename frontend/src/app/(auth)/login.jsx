@@ -6,7 +6,6 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-
 const { width, height } = Dimensions.get('window');
 
 export default function LoginScreen() {
