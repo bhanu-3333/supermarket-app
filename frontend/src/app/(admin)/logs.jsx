@@ -1,17 +1,29 @@
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-
-const { width } = Dimensions.get('window');
+import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 
 export default function AdminMore() {
   const router = useRouter();
   const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    logout();
-    router.replace('/');
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            await logout();
+            router.replace('/');
+          },
+        },
+      ]
+    );
   };
 
   const MenuItem = ({ iconImage, title, onPress, color = '#111' }) => (
@@ -92,84 +104,93 @@ export default function AdminMore() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F7FA' },
   header: {
-    paddingHorizontal: width * 0.05,
-    paddingTop: 50,
-    paddingBottom: 20,
+    paddingHorizontal: wp(5),
+    paddingTop: hp(6),
+    paddingBottom: hp(2.5),
     backgroundColor: '#fff',
   },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#111' },
+  headerTitle: { fontSize: moderateScale(24), fontWeight: 'bold', color: '#111' },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    marginHorizontal: width * 0.05,
-    marginTop: 20,
-    marginBottom: 20,
-    padding: 20,
-    borderRadius: 12,
+    marginHorizontal: wp(5),
+    marginTop: hp(2.5),
+    marginBottom: hp(2.5),
+    padding: wp(5),
+    borderRadius: moderateScale(12),
     elevation: 2,
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
+    maxWidth: isTablet ? 600 : '90%',
+    alignSelf: 'center',
+    width: '90%',
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: moderateScale(64),
+    height: moderateScale(64),
+    borderRadius: moderateScale(32),
     backgroundColor: '#E8F4FD',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: wp(4),
   },
   profileInfo: { flex: 1 },
-  profileName: { fontSize: 18, fontWeight: 'bold', color: '#111', marginBottom: 4 },
-  profileEmail: { fontSize: 14, color: '#666', marginBottom: 8 },
+  profileName: { fontSize: moderateScale(18), fontWeight: 'bold', color: '#111', marginBottom: hp(0.5) },
+  profileEmail: { fontSize: moderateScale(14), color: '#666', marginBottom: hp(1) },
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f0f4f8',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    borderRadius: moderateScale(20),
+    paddingHorizontal: wp(3),
+    paddingVertical: hp(0.5),
     alignSelf: 'flex-start',
   },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22c55e', marginRight: 6 },
-  badgeText: { fontSize: 11, fontWeight: '600', color: '#333' },
+  dot: { width: moderateScale(8), height: moderateScale(8), borderRadius: moderateScale(4), backgroundColor: '#22c55e', marginRight: wp(1.5) },
+  badgeText: { fontSize: moderateScale(11), fontWeight: '600', color: '#333' },
   menuSection: {
     backgroundColor: '#fff',
-    marginHorizontal: width * 0.05,
-    borderRadius: 12,
+    marginHorizontal: wp(5),
+    borderRadius: moderateScale(12),
     overflow: 'hidden',
+    maxWidth: isTablet ? 600 : '90%',
+    alignSelf: 'center',
+    width: '90%',
   },
   menuItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: wp(4),
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  menuLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  menuLeft: { flexDirection: 'row', alignItems: 'center', gap: wp(3) },
   iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(20),
     justifyContent: 'center',
     alignItems: 'center',
   },
-  menuTitle: { fontSize: 16, fontWeight: '500', color: '#111' },
+  menuTitle: { fontSize: moderateScale(16), fontWeight: '500', color: '#111' },
   logoutButton: {
     backgroundColor: '#123F7A',
-    marginHorizontal: width * 0.05,
-    marginTop: 20,
-    borderRadius: 25,
-    paddingVertical: 15,
+    marginHorizontal: wp(5),
+    marginTop: hp(2.5),
+    borderRadius: moderateScale(25),
+    paddingVertical: hp(1.8),
     alignItems: 'center',
+    maxWidth: isTablet ? 600 : '90%',
+    alignSelf: 'center',
+    width: '90%',
   },
   logoutButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '600',
   },
 });
