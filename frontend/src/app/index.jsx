@@ -1,23 +1,21 @@
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import { useRouter, Redirect } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAuth } from '../context/AuthContext';
 import { useEffect } from 'react';
 import SwipeButton from '../components/SwipeButton';
-
-const { width, height } = Dimensions.get('window');
+import { wp, hp, moderateScale, isTablet } from '../utils/responsive';
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && user) {
-      if (user.role === 'admin') router.replace('/(admin)/index');
-      else if (user.role === 'staff') router.replace('/(staff)/index');
-      else router.replace('/(customer)/index');
-    }
-  }, [user, loading]);
+  // Redirect based on user role
+  if (!loading && user) {
+    if (user.role === 'admin') return <Redirect href="/(admin)" />;
+    if (user.role === 'staff') return <Redirect href="/(staff)" />;
+    return <Redirect href="/(customer)" />;
+  }
 
   if (loading) return null;
 
@@ -57,37 +55,41 @@ const styles = StyleSheet.create({
   backgroundShape: {
     position: 'absolute',
     bottom: 0,
-    width: width,
-    height: height * 0.55,
+    width: wp(100),
+    height: hp(55),
     backgroundColor: '#5A92D4',
-    top: height * 0.48,
+    top: hp(48),
     transform: [{ skewY: '-15deg' }],
   },
   content: {
     flex: 1,
     alignItems: 'center',
-    paddingTop: 70,
-    paddingHorizontal: 30,
+    paddingTop: hp(8),
+    paddingHorizontal: wp(8),
+    maxWidth: isTablet ? 600 : '100%',
+    alignSelf: 'center',
+    width: '100%',
   },
   brand: {
-    fontSize: 36,
+    fontSize: moderateScale(36),
     fontWeight: 'bold',
     color: '#0A3B7C',
-    marginBottom: 10,
+    marginBottom: hp(1.2),
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: moderateScale(20),
     fontWeight: 'bold',
     color: '#111',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: hp(1),
   },
   description: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: '#555',
     textAlign: 'center',
-    lineHeight: 21,
-    marginBottom: 10,
+    lineHeight: moderateScale(21),
+    marginBottom: hp(1.2),
+    paddingHorizontal: wp(5),
   },
   imageContainer: {
     flex: 1,
@@ -97,12 +99,13 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   trolley: {
-    width: width * 0.85,
-    height: width * 0.85,
+    width: wp(isTablet ? 50 : 85),
+    height: wp(isTablet ? 50 : 85),
   },
   swipeWrap: {
-    paddingBottom: 50,
+    paddingBottom: hp(6),
     width: '100%',
     alignItems: 'center',
+    paddingHorizontal: wp(5),
   },
 });
