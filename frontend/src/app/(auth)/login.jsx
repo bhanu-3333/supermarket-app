@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  Image, KeyboardAvoidingView, Platform, ActivityIndicator, Dimensions,
+  Image, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-const { width, height } = Dimensions.get('window');
+import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -26,10 +26,8 @@ export default function LoginScreen() {
       const { data } = await api.post('/auth/login', { email, password });
       if (data.success) {
         await login(data.data);
-        const role = data.data.role;
-        if (role === 'admin') router.replace('/(admin)/index');
-        else if (role === 'staff') router.replace('/(staff)/index');
-        else router.replace('/(customer)/index');
+        // After login, redirect to root and let AuthContext handle the routing
+        router.replace('/');
       } else {
         setError(data.message || 'Login failed');
       }
@@ -102,36 +100,58 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F7FA' },
   topImage: { 
     position: 'absolute', 
-    top: -60, 
-    right: -60, 
-    width: width * 0.5, 
-    height: width * 0.5, 
+    top: -hp(8), 
+    right: -wp(15), 
+    width: wp(isTablet ? 30 : 50), 
+    height: wp(isTablet ? 30 : 50), 
     opacity: 0.35 
   },
   bottomImage: { 
     position: 'absolute', 
-    bottom: -60, 
-    left: -60, 
-    width: width * 0.5, 
-    height: width * 0.5, 
+    bottom: -hp(8), 
+    left: -wp(15), 
+    width: wp(isTablet ? 30 : 50), 
+    height: wp(isTablet ? 30 : 50), 
     opacity: 0.35 
   },
-  content: { flex: 1, paddingHorizontal: width * 0.08, justifyContent: 'center' },
+  content: { 
+    flex: 1, 
+    paddingHorizontal: wp(8), 
+    justifyContent: 'center',
+    maxWidth: isTablet ? 500 : '100%',
+    alignSelf: 'center',
+    width: '100%',
+  },
   brandTitle: { 
-    fontSize: Math.min(width * 0.1, 40), 
+    fontSize: moderateScale(40), 
     fontWeight: 'bold', 
     color: '#0A3B7C', 
     textAlign: 'center', 
-    marginBottom: height * 0.06 
+    marginBottom: hp(6) 
   },
   formContainer: { width: '100%', zIndex: 10 },
-  label: { fontSize: 14, fontWeight: '600', color: '#111', marginBottom: 8, marginLeft: 4 },
-  input: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd', borderRadius: 25, paddingHorizontal: 20, paddingVertical: 15, fontSize: 14, marginBottom: 20, elevation: 2 },
-  loginButton: { backgroundColor: '#123F7A', borderRadius: 25, paddingVertical: 15, alignItems: 'center', marginTop: 10, elevation: 3 },
-  loginButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  forgotPasswordContainer: { alignItems: 'center', marginTop: 15 },
-  forgotPasswordText: { color: '#123F7A', fontSize: 14, fontWeight: '500' },
-  createAccountContainer: { position: 'absolute', bottom: 40, alignSelf: 'center' },
-  createAccountText: { color: '#123F7A', fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
-  errorText: { color: 'red', marginBottom: 10, textAlign: 'center', fontSize: 14 },
+  label: { fontSize: moderateScale(14), fontWeight: '600', color: '#111', marginBottom: hp(1), marginLeft: wp(1) },
+  input: { 
+    backgroundColor: '#fff', 
+    borderWidth: 1, 
+    borderColor: '#ddd', 
+    borderRadius: moderateScale(25), 
+    paddingHorizontal: wp(5), 
+    paddingVertical: hp(1.8), 
+    fontSize: moderateScale(14), 
+    marginBottom: hp(2.5) 
+  },
+  loginButton: { 
+    backgroundColor: '#123F7A', 
+    borderRadius: moderateScale(25), 
+    paddingVertical: hp(1.8), 
+    alignItems: 'center', 
+    marginTop: hp(1.2) 
+  },
+  loginButtonText: { color: '#fff', fontSize: moderateScale(16), fontWeight: '600' },
+  forgotPasswordContainer: { alignItems: 'center', marginTop: hp(1.8) },
+  forgotPasswordText: { color: '#123F7A', fontSize: moderateScale(14), fontWeight: '500' },
+  createAccountContainer: { position: 'absolute', bottom: hp(5), alignSelf: 'center' },
+  createAccountText: { color: '#123F7A', fontSize: moderateScale(12), fontWeight: '600', letterSpacing: 0.5 },
+  errorText: { color: 'red', marginBottom: hp(1.2), textAlign: 'center', fontSize: moderateScale(14) },
 });
