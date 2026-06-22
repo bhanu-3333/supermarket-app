@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions,
+  View, Text, StyleSheet, ScrollView, ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
-
-const { width } = Dimensions.get('window');
+import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 
 function StatCard({ label, value, sub, valueColor }) {
   return (
@@ -119,48 +118,99 @@ export default function AdminDashboard() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  content: { padding: width * 0.05, paddingBottom: 40 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, marginTop: 20, flexWrap: 'wrap' },
-  storeName: { fontSize: Math.min(width * 0.065, 26), fontWeight: 'bold', color: '#0A3B7C', maxWidth: '70%' },
-  badge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f0f4f8', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#22c55e', marginRight: 6 },
-  badgeText: { fontSize: 12, fontWeight: '600', color: '#333' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: width * 0.03, marginBottom: 28 },
-  statCard: { 
-    width: width < 400 ? '100%' : '47%', 
-    backgroundColor: '#fff', 
-    borderRadius: 12, 
-    padding: 16, 
-    elevation: 2, 
-    shadowColor: '#000', 
-    shadowOpacity: 0.06, 
-    shadowRadius: 4, 
-    shadowOffset: { width: 0, height: 2 } 
+  content: { 
+    padding: wp(5), 
+    paddingBottom: hp(5),
+    maxWidth: isTablet ? 900 : '100%',
+    alignSelf: 'center',
+    width: '100%',
   },
-  statLabel: { fontSize: 12, color: '#666', marginBottom: 8 },
-  statValue: { fontSize: 22, fontWeight: 'bold', color: '#111', marginBottom: 4 },
-  statSub: { fontSize: 11, color: '#888' },
-  sectionTitle: { fontSize: 20, fontWeight: '700', color: '#111', marginBottom: 14 },
-  orderCard: { 
-    flexDirection: width < 400 ? 'column' : 'row', 
+  header: { 
+    flexDirection: 'row', 
     justifyContent: 'space-between', 
-    alignItems: width < 400 ? 'flex-start' : 'center', 
+    alignItems: 'center', 
+    marginBottom: hp(3), 
+    marginTop: hp(2.5), 
+    flexWrap: 'wrap' 
+  },
+  storeName: { 
+    fontSize: moderateScale(26), 
+    fontWeight: 'bold', 
+    color: '#0A3B7C', 
+    maxWidth: '70%' 
+  },
+  badge: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#f0f4f8', 
+    borderRadius: moderateScale(20), 
+    paddingHorizontal: wp(3), 
+    paddingVertical: hp(0.7) 
+  },
+  dot: { 
+    width: moderateScale(8), 
+    height: moderateScale(8), 
+    borderRadius: moderateScale(4), 
+    backgroundColor: '#22c55e', 
+    marginRight: wp(1.5) 
+  },
+  badgeText: { fontSize: moderateScale(12), fontWeight: '600', color: '#333' },
+  grid: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    gap: wp(3), 
+    marginBottom: hp(3.5) 
+  },
+  statCard: { 
+    width: isTablet ? '48%' : wp(44), 
     backgroundColor: '#fff', 
-    borderRadius: 12, 
-    padding: 16, 
-    marginBottom: 12, 
+    borderRadius: moderateScale(12), 
+    padding: wp(4), 
+    minHeight: hp(13),
     elevation: 2, 
     shadowColor: '#000', 
     shadowOpacity: 0.06, 
     shadowRadius: 4, 
     shadowOffset: { width: 0, height: 2 } 
   },
-  orderIdLabel: { fontSize: 10, color: '#888' },
-  orderId: { fontSize: 12, color: '#333', fontWeight: '500', maxWidth: width * 0.5 },
-  orderDate: { fontSize: 11, color: '#aaa', marginTop: 4 },
-  orderRight: { alignItems: width < 400 ? 'flex-start' : 'flex-end', marginTop: width < 400 ? 12 : 0 },
-  orderPrice: { fontSize: 20, fontWeight: 'bold', color: '#111' },
-  orderWeight: { fontSize: 11, color: '#888', marginTop: 4 },
-  emptyCard: { backgroundColor: '#f9f9f9', borderRadius: 12, padding: 24, alignItems: 'center' },
-  emptyText: { color: '#aaa', fontSize: 14 },
+  statLabel: { fontSize: moderateScale(12), color: '#666', marginBottom: hp(1) },
+  statValue: { fontSize: moderateScale(22), fontWeight: 'bold', color: '#111', marginBottom: hp(0.5) },
+  statSub: { fontSize: moderateScale(11), color: '#888' },
+  sectionTitle: { fontSize: moderateScale(20), fontWeight: '700', color: '#111', marginBottom: hp(1.7) },
+  orderCard: { 
+    flexDirection: isTablet ? 'row' : 'column', 
+    justifyContent: 'space-between', 
+    alignItems: isTablet ? 'center' : 'flex-start', 
+    backgroundColor: '#fff', 
+    borderRadius: moderateScale(12), 
+    padding: wp(4), 
+    marginBottom: hp(1.5), 
+    elevation: 2, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.06, 
+    shadowRadius: 4, 
+    shadowOffset: { width: 0, height: 2 } 
+  },
+  orderIdLabel: { fontSize: moderateScale(10), color: '#888' },
+  orderId: { 
+    fontSize: moderateScale(12), 
+    color: '#333', 
+    fontWeight: '500', 
+    maxWidth: wp(50),
+    flexWrap: 'wrap',
+  },
+  orderDate: { fontSize: moderateScale(11), color: '#aaa', marginTop: hp(0.5) },
+  orderRight: { 
+    alignItems: isTablet ? 'flex-end' : 'flex-start', 
+    marginTop: isTablet ? 0 : hp(1.5) 
+  },
+  orderPrice: { fontSize: moderateScale(20), fontWeight: 'bold', color: '#111' },
+  orderWeight: { fontSize: moderateScale(11), color: '#888', marginTop: hp(0.5) },
+  emptyCard: { 
+    backgroundColor: '#f9f9f9', 
+    borderRadius: moderateScale(12), 
+    padding: hp(3), 
+    alignItems: 'center' 
+  },
+  emptyText: { color: '#aaa', fontSize: moderateScale(14) },
 });
