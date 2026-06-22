@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { Ionicons } from '@expo/vector-icons';
-
-
-const { width } = Dimensions.get('window');
+import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 
 export default function StaffDashboard() {
   const router = useRouter();
@@ -124,34 +122,140 @@ export default function StaffDashboard() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
-  content: { padding: width * 0.05, paddingBottom: 40 },
+  content: { 
+    padding: wp(5), 
+    paddingBottom: hp(5),
+    maxWidth: isTablet ? 900 : '100%',
+    alignSelf: 'center',
+    width: '100%',
+  },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, marginTop: 20, flexWrap: 'wrap' },
-  storeName: { fontSize: Math.min(width * 0.065, 26), fontWeight: 'bold', color: '#0A3B7C', maxWidth: '70%' },
-  badge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f0f4f8', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#3b82f6', marginRight: 6 },
-  badgeText: { fontSize: 12, fontWeight: '600', color: '#333' },
-  grid: { flexDirection: width < 400 ? 'column' : 'row', gap: 12, marginBottom: 16 },
-  statCard: { flex: width < 400 ? 0 : 1, backgroundColor: '#fff', borderRadius: 12, padding: 16, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  iconCircle: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  statLabel: { fontSize: 12, color: '#666', marginBottom: 4 },
-  statValue: { fontSize: 28, fontWeight: 'bold', color: '#111', marginBottom: 2 },
-  statSub: { fontSize: 11, color: '#888' },
-  addCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 24, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  addLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  addTitle: { fontSize: 18, fontWeight: '600', color: '#111' },
-  addSub: { fontSize: 13, color: '#888', marginTop: 2 },
-  addButton: { width: width < 400 ? 80 : 120, height: 60, backgroundColor: '#D6E8FF', borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#111', marginBottom: 14 },
-  productCard: { flexDirection: width < 400 ? 'column' : 'row', justifyContent: 'space-between', backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: hp(3), 
+    marginTop: hp(2.5), 
+    flexWrap: 'wrap' 
+  },
+  storeName: { 
+    fontSize: moderateScale(26), 
+    fontWeight: 'bold', 
+    color: '#0A3B7C', 
+    maxWidth: '70%' 
+  },
+  badge: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#f0f4f8', 
+    borderRadius: moderateScale(20), 
+    paddingHorizontal: wp(3), 
+    paddingVertical: hp(0.7) 
+  },
+  dot: { 
+    width: moderateScale(8), 
+    height: moderateScale(8), 
+    borderRadius: moderateScale(4), 
+    backgroundColor: '#3b82f6', 
+    marginRight: wp(1.5) 
+  },
+  badgeText: { fontSize: moderateScale(12), fontWeight: '600', color: '#333' },
+  grid: { 
+    flexDirection: 'row', 
+    gap: wp(3), 
+    marginBottom: hp(2),
+    flexWrap: 'wrap',
+  },
+  statCard: { 
+    flex: 1,
+    minWidth: isTablet ? '48%' : wp(43), 
+    backgroundColor: '#fff', 
+    borderRadius: moderateScale(12), 
+    padding: wp(4), 
+    elevation: 2, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.06, 
+    shadowRadius: 4, 
+    shadowOffset: { width: 0, height: 2 } 
+  },
+  iconCircle: { 
+    width: moderateScale(48), 
+    height: moderateScale(48), 
+    borderRadius: moderateScale(24), 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginBottom: hp(1.5) 
+  },
+  statLabel: { fontSize: moderateScale(12), color: '#666', marginBottom: hp(0.5) },
+  statValue: { fontSize: moderateScale(28), fontWeight: 'bold', color: '#111', marginBottom: hp(0.2) },
+  statSub: { fontSize: moderateScale(11), color: '#888' },
+  addCard: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    backgroundColor: '#fff', 
+    borderRadius: moderateScale(12), 
+    padding: wp(4), 
+    marginBottom: hp(3), 
+    elevation: 2, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.06, 
+    shadowRadius: 4, 
+    shadowOffset: { width: 0, height: 2 } 
+  },
+  addLeft: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: wp(3), 
+    flex: 1 
+  },
+  addTitle: { fontSize: moderateScale(18), fontWeight: '600', color: '#111' },
+  addSub: { fontSize: moderateScale(13), color: '#888', marginTop: hp(0.2) },
+  addButton: { 
+    width: wp(isTablet ? 15 : 25), 
+    height: hp(7), 
+    backgroundColor: '#D6E8FF', 
+    borderRadius: moderateScale(12), 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  sectionTitle: { fontSize: moderateScale(18), fontWeight: '700', color: '#111', marginBottom: hp(1.7) },
+  productCard: { 
+    flexDirection: isTablet ? 'row' : 'column', 
+    justifyContent: 'space-between', 
+    backgroundColor: '#fff', 
+    borderRadius: moderateScale(12), 
+    padding: wp(4), 
+    marginBottom: hp(1.5), 
+    elevation: 2, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.06, 
+    shadowRadius: 4, 
+    shadowOffset: { width: 0, height: 2 } 
+  },
   productLeft: { flex: 1 },
-  productName: { fontSize: 16, fontWeight: '600', color: '#111', marginBottom: 4 },
-  productWeight: { fontSize: 13, color: '#666', marginBottom: 6 },
-  barcodeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  barcode: { fontSize: 12, color: '#666' },
-  productRight: { alignItems: width < 400 ? 'flex-start' : 'flex-end', marginTop: width < 400 ? 12 : 0 },
-  productPrice: { fontSize: 18, fontWeight: 'bold', color: '#111', marginBottom: 4 },
-  productStock: { fontSize: 12, color: '#888', backgroundColor: '#f0f0f0', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  emptyCard: { backgroundColor: '#f9f9f9', borderRadius: 12, padding: 32, alignItems: 'center' },
-  emptyText: { color: '#aaa', fontSize: 14 },
+  productName: { fontSize: moderateScale(16), fontWeight: '600', color: '#111', marginBottom: hp(0.5) },
+  productWeight: { fontSize: moderateScale(13), color: '#666', marginBottom: hp(0.7) },
+  barcodeRow: { flexDirection: 'row', alignItems: 'center', gap: wp(1) },
+  barcode: { fontSize: moderateScale(12), color: '#666' },
+  productRight: { 
+    alignItems: isTablet ? 'flex-end' : 'flex-start', 
+    marginTop: isTablet ? 0 : hp(1.5) 
+  },
+  productPrice: { fontSize: moderateScale(18), fontWeight: 'bold', color: '#111', marginBottom: hp(0.5) },
+  productStock: { 
+    fontSize: moderateScale(12), 
+    color: '#888', 
+    backgroundColor: '#f0f0f0', 
+    paddingHorizontal: wp(2.5), 
+    paddingVertical: hp(0.5), 
+    borderRadius: moderateScale(12) 
+  },
+  emptyCard: { 
+    backgroundColor: '#f9f9f9', 
+    borderRadius: moderateScale(12), 
+    padding: hp(4), 
+    alignItems: 'center' 
+  },
+  emptyText: { color: '#aaa', fontSize: moderateScale(14) },
 });
