@@ -48,12 +48,17 @@ export default function RegisterScreen() {
     setIsLoading(true);
     
     try {
+      console.log('Attempting registration...');
+      console.log('API URL:', 'http://10.67.83.219:5000/api/auth/register-admin');
+      
       const { data } = await api.post('/auth/register-admin', {
         storeName: companyName,
         ownerName,
         email,
         password,
       });
+
+      console.log('Registration response:', data);
 
       if (data.success) {
         Alert.alert(
@@ -70,6 +75,8 @@ export default function RegisterScreen() {
         setError(data.message || 'Registration failed');
       }
     } catch (err) {
+      console.error('Registration error:', err);
+      console.error('Error details:', err.response?.data);
       const errorMsg = err.response?.data?.message || 'Network error. Please check your connection.';
       setError(errorMsg);
     } finally {
