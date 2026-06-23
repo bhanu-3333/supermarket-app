@@ -8,7 +8,7 @@ export default function AdminMore() {
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
@@ -18,8 +18,15 @@ export default function AdminMore() {
           text: 'Logout',
           style: 'destructive',
           onPress: async () => {
-            await logout();
-            router.replace('/');
+            try {
+              console.log('Logging out...');
+              await logout();
+              console.log('Logout successful, navigating to root');
+              router.replace('/');
+            } catch (error) {
+              console.error('Logout error:', error);
+              Alert.alert('Error', 'Failed to logout');
+            }
           },
         },
       ]
