@@ -66,6 +66,203 @@ router.get('/dashboard', protect, authorize('admin'), async (req, res) => {
   }
 });
 
+// @route   GET /api/admin/sales/today
+// @desc    Get today's sales analytics
+// @access  Private (Admin)
+router.get('/sales/today', protect, authorize('admin'), async (req, res) => {
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const orders = await Order.find({
+      storeId: req.user.storeId,
+      createdAt: { $gte: startOfDay }
+    }).populate('user', 'name email');
+    
+    const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+    const totalOrders = orders.length;
+    const uniqueCustomers = new Set(orders.map(o => o.user._id.toString())).size;
+    
+    res.json({ 
+      success: true, 
+      data: { 
+        totalRevenue, 
+        totalOrders, 
+        totalCustomers: uniqueCustomers,
+        orders 
+      } 
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   GET /api/admin/sales/monthly
+// @desc    Get monthly sales analytics
+// @access  Private (Admin)
+router.get('/sales/monthly', protect, authorize('admin'), async (req, res) => {
+  try {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    
+    const orders = await Order.find({
+      storeId: req.user.storeId,
+      createdAt: { $gte: startOfMonth }
+    }).populate('user', 'name email');
+    
+    const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+    const totalOrders = orders.length;
+    const uniqueCustomers = new Set(orders.map(o => o.user._id.toString())).size;
+    
+    res.json({ 
+      success: true, 
+      data: { 
+        totalRevenue, 
+        totalOrders, 
+        totalCustomers: uniqueCustomers,
+        orders 
+      } 
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   GET /api/admin/sales/yearly
+// @desc    Get yearly sales analytics
+// @access  Private (Admin)
+router.get('/sales/yearly', protect, authorize('admin'), async (req, res) => {
+  try {
+    const orders = await Order.find({ storeId: req.user.storeId })
+      .populate('user', 'name email');
+    
+    const salesByYear = {};
+    orders.forEach(order => {
+      const year = new Date(order.createdAt).getFullYear();
+      salesByYear[year] = (salesByYear[year] || 0) + order.totalPrice;
+    });
+    
+    const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+    const totalOrders = orders.length;
+    const uniqueCustomers = new Set(orders.map(o => o.user._id.toString())).size;
+    
+    res.json({ 
+      success: true, 
+      data: { 
+        totalRevenue, 
+        totalOrders, 
+        totalCustomers: uniqueCustomers,
+        salesByYear,
+        orders 
+      } 
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   GET /api/admin/customers/today
+// @desc    Get today's customer analytics
+// @access  Private (Admin)
+router.get('/customers/today', protect, authorize('admin'), async (req, res) => {
+  try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const orders = await Order.find({
+      storeId: req.user.storeId,
+      createdAt: { $gte: startOfDay }
+    }).populate('user', 'name email');
+    
+    const customersMap = new Map();
+    orders.forEach(order => {
+      const customerId = order.user._id.toString();
+      if (!customersMap.has(customerId)) {
+        customersMap.set(customerId, {
+          customer: order.user,
+          totalSpent: 0,
+          orderCount: 0
+        });
+      }
+      const customerData = customersMap.get(customerId);
+      customerData.totalSpent += order.totalPrice;
+      customerData.orderCount += 1;
+    });
+    
+    const customers = Array.from(customersMap.values());
+    
+    res.json({ success: true, data: { customers, orders } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   GET /api/admin/customers/monthly
+// @desc    Get monthly customer analytics
+// @access  Private (Admin)
+router.get('/customers/monthly', protect, authorize('admin'), async (req, res) => {
+  try {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    
+    const orders = await Order.find({
+      storeId: req.user.storeId,
+      createdAt: { $gte: startOfMonth }
+    }).populate('user', 'name email');
+    
+    const customersMap = new Map();
+    orders.forEach(order => {
+      const customerId = order.user._id.toString();
+      if (!customersMap.has(customerId)) {
+        customersMap.set(customerId, {
+          customer: order.user,
+          totalSpent: 0,
+          orderCount: 0
+        });
+      }
+      const customerData = customersMap.get(customerId);
+      customerData.totalSpent += order.totalPrice;
+      customerData.orderCount += 1;
+    });
+    
+    const customers = Array.from(customersMap.values());
+    
+    res.json({ success: true, data: { customers, orders } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   GET /api/admin/customers/yearly
+// @desc    Get yearly customer analytics
+// @access  Private (Admin)
+router.get('/customers/yearly', protect, authorize('admin'), async (req, res) => {
+  try {
+    const orders = await Order.find({ storeId: req.user.storeId })
+      .populate('user', 'name email');
+    
+    const customersByYear = {};
+    orders.forEach(order => {
+      const year = new Date(order.createdAt).getFullYear();
+      if (!customersByYear[year]) {
+        customersByYear[year] = new Set();
+      }
+      customersByYear[year].add(order.user._id.toString());
+    });
+    
+    const customerGrowth = {};
+    Object.keys(customersByYear).forEach(year => {
+      customerGrowth[year] = customersByYear[year].size;
+    });
+    
+    res.json({ success: true, data: { customerGrowth, orders } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // @route   GET /api/admin/staff
 // @desc    Get all staff members
 // @access  Private (Admin)
