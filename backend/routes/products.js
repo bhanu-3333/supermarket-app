@@ -3,6 +3,27 @@ const router = express.Router();
 const Product = require('../models/Product');
 const { protect, authorize } = require('../middleware/auth');
 
+// @route   GET /api/products/barcode/:barcode
+// @desc    Get product by barcode
+// @access  Private (All authenticated users)
+router.get('/barcode/:barcode', protect, async (req, res) => {
+  try {
+    const product = await Product.findOne({ 
+      barcode: req.params.barcode,
+      storeId: req.user.storeId 
+    });
+    
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    
+    res.json({ success: true, data: product });
+  } catch (err) {
+    console.error('Barcode lookup error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // @route   GET /api/products
 // @desc    Get all products
 // @access  Private (Staff/Admin)
