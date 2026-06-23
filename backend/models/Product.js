@@ -9,10 +9,11 @@ const ProductSchema = new mongoose.Schema({
   barcode: {
     type: String,
     required: [true, 'Please add a barcode'],
+    unique: true,
   },
   category: {
     type: String,
-    required: [true, 'Please add a category'],
+    default: 'Grocery',
     enum: [
       'Grocery', 'Fruits', 'Vegetables', 'Dairy',
       'Beverages', 'Snacks', 'Household', 'Personal Care'
@@ -20,11 +21,12 @@ const ProductSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    required: [true, 'Please add a description'],
+    default: '',
   },
   price: {
     type: Number,
     required: [true, 'Please add a price'],
+    min: [0, 'Price cannot be negative']
   },
   stockQuantity: {
     type: Number,
@@ -34,11 +36,12 @@ const ProductSchema = new mongoose.Schema({
   weight: {
     type: Number,
     required: [true, 'Please add weight'],
+    min: [0, 'Weight cannot be negative']
   },
   weightUnit: {
     type: String,
-    required: [true, 'Please add weight unit (e.g., kg, g, l, ml)'],
-    enum: ['kg', 'g', 'l', 'ml', 'unit']
+    required: [true, 'Please add weight unit'],
+    enum: ['Kg', 'g', 'L', 'ml', 'unit']
   },
   productImage: {
     type: String,
@@ -58,6 +61,12 @@ const ProductSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Product', ProductSchema);
