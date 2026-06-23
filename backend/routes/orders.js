@@ -20,7 +20,7 @@ router.get('/recent', protect, authorize('admin'), async (req, res) => {
 });
 
 // @route   GET /api/orders
-// @desc    Get all orders
+// @desc    Get all orders for admin
 // @access  Private (Admin)
 router.get('/', protect, authorize('admin'), async (req, res) => {
   try {
@@ -29,6 +29,30 @@ router.get('/', protect, authorize('admin'), async (req, res) => {
       .populate('user', 'name email');
     
     res.json({ success: true, data: orders });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   GET /api/orders/date/:date
+// @desc    Get orders by specific date
+// @access  Private (Admin)
+router.get('/date/:date', protect, authorize('admin'), async (req, res) => {
+  try {
+    const selectedDate = new Date(req.params.date);
+    const startOfDay = new Date(selectedDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(selectedDate.setHours(23, 59, 59, 999));
+    
+    const orders = await Order.find({
+      storeId: req.user.storeId,
+      createdAt: { $gte: startOfDay, $lte: endOfDay }
+    })
+    .sort({ createdAt: -1 })
+    .populate('user', 'name email');
+    
+    const totalSales = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+    
+    res.json({ success: true, data: { orders, totalSales } });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
