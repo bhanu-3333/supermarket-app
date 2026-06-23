@@ -23,8 +23,22 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('smartcart_user');
-    setUser(null);
+    try {
+      // Clear all AsyncStorage items
+      await AsyncStorage.multiRemove([
+        'smartcart_user',
+        'token',
+        'user',
+        'role',
+        'storeId',
+        'cart'
+      ]);
+      
+      // Reset auth state
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (
