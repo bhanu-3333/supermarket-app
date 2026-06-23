@@ -8,8 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export const useTabBarConfig = () => {
   const insets = useSafeAreaInsets();
   
-  // Calculate proper heights
-  const TAB_BAR_HEIGHT = 65;
+  // Calculate proper heights - increased to 90px for better label visibility
+  const TAB_BAR_HEIGHT = 90;
   const SAFE_AREA_PADDING = Math.max(insets.bottom, 10);
   const TOTAL_HEIGHT = TAB_BAR_HEIGHT + SAFE_AREA_PADDING;
 
@@ -27,7 +27,7 @@ export const useTabBarConfig = () => {
       borderTopWidth: 1,
       borderTopColor: '#E5E7EB',
       paddingBottom: SAFE_AREA_PADDING,
-      paddingTop: 8,
+      paddingTop: 10,
       paddingHorizontal: 0,
       elevation: 8,
       shadowColor: '#000',
@@ -38,8 +38,9 @@ export const useTabBarConfig = () => {
     tabBarLabelStyle: {
       fontSize: 12,
       fontWeight: '500',
-      marginTop: 4,
-      marginBottom: 0,
+      marginTop: 6,
+      marginBottom: 4,
+      textAlign: 'center',
     },
     tabBarIconStyle: {
       marginTop: 0,
@@ -49,10 +50,12 @@ export const useTabBarConfig = () => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      paddingVertical: 4,
-      paddingHorizontal: 0,
+      paddingVertical: 6,
+      paddingHorizontal: 2,
+      height: '100%',
     },
     tabBarAllowFontScaling: false,
+    tabBarLabelPosition: 'below-icon',
   };
 };
 
