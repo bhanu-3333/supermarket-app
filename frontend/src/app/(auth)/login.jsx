@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  View, Text, StyleSheet, TextInput, TouchableOpacity,
+  View, Text, StyleSheet, TextInput, TouchableOpacity, Image,
   KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -90,6 +90,16 @@ export default function LoginScreen() {
       
       <View style={styles.content}>
         <Text style={styles.brandTitle}>SmartCart</Text>
+        
+        {/* Trolley Image */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={require('../../../assets/images/trolly.png')}
+            style={styles.trolleyImage}
+            resizeMode="contain"
+          />
+        </View>
+
         <View style={styles.formContainer}>
           <Text style={styles.label}>Email Id :</Text>
           <TextInput
