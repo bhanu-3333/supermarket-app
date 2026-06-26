@@ -9,13 +9,11 @@ import { wp, hp, moderateScale } from '../../utils/responsive';
 function StatCard({ imageSource, label, value, sub }) {
   return (
     <View style={styles.statCard}>
-      <View style={styles.iconCircle}>
-        <Image 
-          source={imageSource} 
-          style={styles.cardIcon}
-          resizeMode="contain"
-        />
-      </View>
+      <Image 
+        source={imageSource} 
+        style={styles.cardIcon}
+        resizeMode="contain"
+      />
       <Text style={styles.statLabel}>{label}</Text>
       <Text style={styles.statValue}>{value}</Text>
       {sub ? <Text style={styles.statSub}>{sub}</Text> : null}
@@ -211,18 +209,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     minHeight: hp(18),
   },
-  iconCircle: {
-    width: moderateScale(56),
-    height: moderateScale(56),
-    borderRadius: moderateScale(28),
-    backgroundColor: '#E8F4FD',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: hp(1.8),
-  },
   cardIcon: {
-    width: moderateScale(32),
-    height: moderateScale(32),
+    width: moderateScale(48),
+    height: moderateScale(48),
+    marginBottom: hp(1.8),
   },
   statLabel: {
     fontSize: moderateScale(12),
