@@ -5,34 +5,72 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import api from '../../utils/api';
 import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 
 export default function LoginScreen() {
   const router = useRouter();
   const { login } = useAuth();
+  const toast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    setError('');
-    if (!email || !password) { setError('Please fill in all fields'); return; }
-    if (!email.includes('@')) { setError('Please enter a valid email'); return; }
+    if (!email || !password) {
+      toast.error('Missing Fields', 'Please fill in all fields');
+      return;
+    }
+    if (!email.includes('@')) {
+      toast.error('Invalid Email', 'Please enter a valid email address');
+      return;
+    }
 
     setIsLoading(true);
+    console.log('[LOGIN] Starting login for:', email);
+
     try {
+      console.log('[LOGIN] Making API request to /auth/login');
       const { data } = await api.post('/auth/login', { email, password });
+      console.log('[LOGIN] API response received:', data.success ? 'Success' : 'Failed');
+
       if (data.success) {
+        console.log('[LOGIN] User role:', data.data.role);
+        console.log('[LOGIN] Saving user data...');
+        
+        // Show success toast
+        toast.success('Login Successful', 'Welcome back!');
+        
         await login(data.data);
-        // After login, redirect to root and let AuthContext handle the routing
-        router.replace('/');
+        console.log('[LOGIN] Redirecting to home...');
+        
+        // Navigate after short delay to show toast
+        setTimeout(() => {
+          router.replace('/');
+        }, 1500);
       } else {
-        setError(data.message || 'Login failed');
+        console.log('[LOGIN] Login failed:', data.message);
+        toast.error('Login Failed', data.message || 'Please check your credentials');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Network error. Check your connection.');
+      console.error('[LOGIN] Login error:', err);
+      if (err.response) {
+        console.error('[LOGIN] Server responded with error:', err.response.status, err.response.data);
+        
+        if (err.response.status === 401) {
+          toast.error('Invalid Email or Password', 'Please check your credentials and try again');
+        } else {
+          toast.error('Login Failed', err.response?.data?.message || 'Something went wrong');
+        }
+      } else if (err.request) {
+        console.error('[LOGIN] No response from server. Check network connection.');
+        console.error('[LOGIN] Request details:', err.request);
+        toast.error('Server Error', 'Unable to connect to server. Please try again later');
+      } else {
+        console.error('[LOGIN] Request setup error:', err.message);
+        toast.error('Network Error', 'Check your connection and try again');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +94,6 @@ export default function LoginScreen() {
       <View style={styles.content}>
         <Text style={styles.brandTitle}>SmartCart</Text>
         <View style={styles.formContainer}>
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
           <Text style={styles.label}>Email Id :</Text>
           <TextInput
             style={styles.input}
@@ -153,5 +190,4 @@ const styles = StyleSheet.create({
   forgotPasswordText: { color: '#123F7A', fontSize: moderateScale(14), fontWeight: '500' },
   createAccountContainer: { position: 'absolute', bottom: hp(5), alignSelf: 'center' },
   createAccountText: { color: '#123F7A', fontSize: moderateScale(12), fontWeight: '600', letterSpacing: 0.5 },
-  errorText: { color: 'red', marginBottom: hp(1.2), textAlign: 'center', fontSize: moderateScale(14) },
 });
