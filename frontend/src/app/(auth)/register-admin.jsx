@@ -107,21 +107,19 @@ export default function RegisterScreen() {
         style={styles.bottomImage}
         resizeMode="contain"
       />
+      
+      {/* Trolley Watermark Background */}
+      <Image
+        source={require('../../../assets/images/trolly.png')}
+        style={styles.trolleyWatermark}
+        resizeMode="contain"
+      />
 
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.brandTitle}>SmartCart</Text>
-
-        {/* Trolley Image */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={require('../../../assets/images/trolly.png')}
-            style={styles.trolleyImage}
-            resizeMode="contain"
-          />
-        </View>
 
         <View style={styles.formContainer}>
           <Text style={styles.label}>Company name :</Text>
@@ -210,12 +208,22 @@ const styles = StyleSheet.create({
     height: width * 0.5, 
     opacity: 0.35 
   },
+  trolleyWatermark: {
+    position: 'absolute',
+    bottom: height * 0.2,
+    left: width * 0.1,
+    width: width * 0.8,
+    height: width * 0.8,
+    opacity: 0.08,
+    zIndex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: width * 0.08,
     justifyContent: 'center',
     paddingTop: height * 0.08,
     paddingBottom: 40,
+    zIndex: 2,
   },
   brandTitle: {
     fontSize: Math.min(width * 0.1, 40),
