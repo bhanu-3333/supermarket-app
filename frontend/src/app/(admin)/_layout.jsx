@@ -64,6 +64,18 @@ export default function AdminLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="yearly-sales"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="yearly-customer"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
