@@ -114,6 +114,15 @@ export default function RegisterScreen() {
       >
         <Text style={styles.brandTitle}>SmartCart</Text>
 
+        {/* Trolley Image */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={require('../../../assets/images/trolly.png')}
+            style={styles.trolleyImage}
+            resizeMode="contain"
+          />
+        </View>
+
         <View style={styles.formContainer}>
           <Text style={styles.label}>Company name :</Text>
           <TextInput 
