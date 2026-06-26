@@ -13,11 +13,18 @@ export default function CustomerProfile() {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      console.log('[CUSTOMER LOGOUT] Starting logout...');
+      const success = await logout();
+      console.log('[CUSTOMER LOGOUT] Logout result:', success);
       setShowLogoutModal(false);
-      router.replace('/');
+      
+      // Add small delay to ensure state updates
+      setTimeout(() => {
+        console.log('[CUSTOMER LOGOUT] Navigating to root...');
+        router.replace('/');
+      }, 100);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('[CUSTOMER LOGOUT] Logout error:', error);
     }
   };
 
