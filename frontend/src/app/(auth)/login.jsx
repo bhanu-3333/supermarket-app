@@ -88,6 +88,13 @@ export default function LoginScreen() {
       <View style={styles.bgShape1} />
       <View style={styles.bgShape2} />
       
+      {/* Trolley Watermark Background */}
+      <Image
+        source={require('../../../assets/images/trolly.png')}
+        style={styles.trolleyWatermark}
+        resizeMode="contain"
+      />
+      
       <View style={styles.content}>
         <Text style={styles.brandTitle}>SmartCart</Text>
         
