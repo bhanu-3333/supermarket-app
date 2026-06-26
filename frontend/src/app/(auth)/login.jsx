@@ -205,7 +205,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', 
     color: '#0A3B7C', 
     textAlign: 'center', 
-    marginBottom: hp(6) 
+    marginBottom: hp(3) 
+  },
+  imageContainer: {
+    alignItems: 'center',
+    marginBottom: hp(3),
+  },
+  trolleyImage: {
+    width: wp(isTablet ? 30 : 45),
+    height: wp(isTablet ? 30 : 45),
   },
   formContainer: { width: '100%', zIndex: 10 },
   label: { fontSize: moderateScale(14), fontWeight: '600', color: '#111', marginBottom: hp(1), marginLeft: wp(1) },
