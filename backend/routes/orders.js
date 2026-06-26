@@ -58,6 +58,46 @@ router.get('/date/:date', protect, authorize('admin'), async (req, res) => {
   }
 });
 
+// @route   GET /api/orders/customer
+// @desc    Get customer's order history
+// @access  Private (Customer)
+router.get('/customer', protect, authorize('customer'), async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id })
+      .sort({ createdAt: -1 });
+    
+    res.json({ success: true, data: orders });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   GET /api/orders/:id
+// @desc    Get single order details
+// @access  Private
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+    
+    // Check authorization - customer can only see their own orders, admin/staff can see store orders
+    if (req.user.role === 'customer' && order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+    
+    if ((req.user.role === 'admin' || req.user.role === 'staff') && order.storeId.toString() !== req.user.storeId.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+    
+    res.json({ success: true, data: order });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 // @route   POST /api/orders
 // @desc    Create new order
 // @access  Private
