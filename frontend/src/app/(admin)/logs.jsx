@@ -1,36 +1,24 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
+import { useState } from 'react';
+import LogoutModal from '../../components/LogoutModal';
 
 export default function AdminMore() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              console.log('Logging out...');
-              await logout();
-              console.log('Logout successful, navigating to root');
-              router.replace('/');
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Error', 'Failed to logout');
-            }
-          },
-        },
-      ]
-    );
+    try {
+      await logout();
+      setShowLogoutModal(false);
+      router.replace('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const MenuItem = ({ iconImage, title, onPress, color = '#111' }) => (
@@ -101,9 +89,15 @@ export default function AdminMore() {
         />
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+      <TouchableOpacity style={styles.logoutButton} onPress={() => setShowLogoutModal(true)}>
         <Text style={styles.logoutButtonText}>Log out</Text>
       </TouchableOpacity>
+
+      <LogoutModal
+        visible={showLogoutModal}
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutModal(false)}
+      />
     </View>
   );
 }
