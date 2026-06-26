@@ -14,34 +14,33 @@ import {
   Dimensions
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useToast } from '../../context/ToastContext';
 import api from '../../utils/api';
 
 const { width, height } = Dimensions.get('window');
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const toast = useToast();
   const [companyName, setCompanyName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleRegister = async () => {
-    setError('');
-    
     if (!companyName || !ownerName || !email || !password) {
-      setError('Please fill in all fields');
+      toast.error('Missing Fields', 'Please fill in all fields');
       return;
     }
 
     if (!email.includes('@')) {
-      setError('Please enter a valid email address');
+      toast.error('Invalid Email', 'Please enter a valid email address');
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      toast.error('Weak Password', 'Password must be at least 6 characters');
       return;
     }
 
@@ -49,7 +48,6 @@ export default function RegisterScreen() {
     
     try {
       console.log('Attempting registration...');
-      console.log('API URL:', 'http://10.67.83.219:5000/api/auth/register-admin');
       
       const { data } = await api.post('/auth/register-admin', {
         storeName: companyName,
@@ -61,24 +59,34 @@ export default function RegisterScreen() {
       console.log('Registration response:', data);
 
       if (data.success) {
+        toast.success('Account Created Successfully', 'Your supermarket account has been created');
+        
         Alert.alert(
-          'Success!',
-          `Account created successfully!\n\nStore Code: ${data.data.storeCode}\n\nYou can now login with your credentials.`,
+          'Registration Successful!',
+          `Store Code: ${data.data.storeCode}\n\nPlease save this code. Your staff and customers will need it to register.`,
           [
             {
               text: 'OK',
-              onPress: () => router.push('/(auth)/login'),
+              onPress: () => {
+                setTimeout(() => {
+                  router.push('/(auth)/login');
+                }, 500);
+              },
             },
           ]
         );
       } else {
-        setError(data.message || 'Registration failed');
+        toast.error('Registration Failed', data.message || 'Unable to create account');
       }
     } catch (err) {
       console.error('Registration error:', err);
       console.error('Error details:', err.response?.data);
-      const errorMsg = err.response?.data?.message || 'Network error. Please check your connection.';
-      setError(errorMsg);
+      
+      if (err.response?.status === 400 && err.response?.data?.message?.includes('already exists')) {
+        toast.error('Email Already Registered', 'Please use a different email address');
+      } else {
+        toast.error('Server Error', err.response?.data?.message || 'Unable to connect to server');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -107,8 +115,6 @@ export default function RegisterScreen() {
         <Text style={styles.brandTitle}>SmartCart</Text>
 
         <View style={styles.formContainer}>
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
           <Text style={styles.label}>Company name :</Text>
           <TextInput 
             style={styles.input}
@@ -251,12 +257,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-  },
-  errorText: {
-    color: 'red',
-    marginBottom: 10,
-    textAlign: 'center',
-    fontSize: 14,
   },
   spacer: {
     flex: 1,
