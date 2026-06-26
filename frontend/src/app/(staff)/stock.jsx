@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Activity
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { Ionicons } from '@expo/vector-icons';
+import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
 
 export default function StaffStock() {
   const { user } = useAuth();
@@ -13,6 +14,8 @@ export default function StaffStock() {
   const [showFilter, setShowFilter] = useState(false);
   const [sortBy, setSortBy] = useState('');
   const [stockFilter, setStockFilter] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -103,30 +106,28 @@ export default function StaffStock() {
   };
 
   const handleDelete = async (productId, productName) => {
-    Alert.alert(
-      'Delete Product',
-      `Are you sure you want to delete "${productName}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const { data } = await api.delete(`/products/${productId}`, {
-                headers: { Authorization: `Bearer ${user?.token}` }
-              });
-              if (data.success) {
-                Alert.alert('Success', 'Product deleted');
-                fetchProducts();
-              }
-            } catch (err) {
-              Alert.alert('Error', 'Failed to delete product');
-            }
-          }
-        }
-      ]
-    );
+    setProductToDelete({ id: productId, name: productName });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+
+    try {
+      const { data } = await api.delete(`/products/${productToDelete.id}`, {
+        headers: { Authorization: `Bearer ${user?.token}` }
+      });
+      if (data.success) {
+        Alert.alert('Success', 'Product deleted successfully');
+        setShowDeleteModal(false);
+        setProductToDelete(null);
+        fetchProducts();
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Failed to delete product');
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+    }
   };
 
   const renderProduct = ({ item }) => {
@@ -290,6 +291,17 @@ export default function StaffStock() {
           </View>
         </View>
       </Modal>
+
+      <DeleteConfirmationModal
+        visible={showDeleteModal}
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setProductToDelete(null);
+        }}
+        title="Are You sure want to delete this product?"
+        buttonText="Delete"
+      />
     </View>
   );
 }
