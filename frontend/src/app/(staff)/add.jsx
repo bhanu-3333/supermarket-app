@@ -6,21 +6,19 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
   ActivityIndicator,
-  Modal,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { Ionicons } from '@expo/vector-icons';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import BarcodeScanner from '../../components/BarcodeScanner';
 import api from '../../utils/api';
 import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 
 export default function StaffAdd() {
   const { user } = useAuth();
-  const [permission, requestPermission] = useCameraPermissions();
+  const toast = useToast();
   const [showScanner, setShowScanner] = useState(false);
-  const [scanned, setScanned] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -32,10 +30,7 @@ export default function StaffAdd() {
     weightUnit: 'Kg',
   });
 
-  const handleBarcodeScanned = async ({ data }) => {
-    if (scanned) return;
-    setScanned(true);
-
+  const handleBarcodeScanned = async (data) => {
     // Check if barcode already exists
     try {
       const response = await api.get(`/products/barcode/${data}`, {
@@ -44,7 +39,6 @@ export default function StaffAdd() {
       
       if (response.data.success) {
         Alert.alert('Error', 'Product barcode already exists');
-        setScanned(false);
         return;
       }
     } catch (err) {
@@ -52,24 +46,14 @@ export default function StaffAdd() {
       if (err.response?.status === 404) {
         setFormData({ ...formData, barcode: data });
         setShowScanner(false);
-        setScanned(false);
       } else {
         Alert.alert('Error', 'Failed to validate barcode');
-        setScanned(false);
       }
     }
   };
 
-  const openScanner = async () => {
-    if (!permission?.granted) {
-      const result = await requestPermission();
-      if (!result.granted) {
-        Alert.alert('Permission Required', 'Camera permission is required to scan barcodes');
-        return;
-      }
-    }
+  const openScanner = () => {
     setShowScanner(true);
-    setScanned(false);
   };
 
   const validateForm = () => {
@@ -252,32 +236,12 @@ export default function StaffAdd() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Barcode Scanner Modal */}
-      <Modal visible={showScanner} animationType="slide">
-        <View style={styles.scannerContainer}>
-          <CameraView
-            style={styles.camera}
-            facing="back"
-            barcodeScannerSettings={{
-              barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'],
-            }}
-            onBarcodeScanned={handleBarcodeScanned}
-          >
-            <View style={styles.scannerOverlay}>
-              <Text style={styles.scannerText}>Scan Product Barcode</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => {
-                  setShowScanner(false);
-                  setScanned(false);
-                }}
-              >
-                <Ionicons name="close-circle" size={48} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </CameraView>
-        </View>
-      </Modal>
+      {/* Barcode Scanner */}
+      <BarcodeScanner
+        visible={showScanner}
+        onScan={handleBarcodeScanned}
+        onClose={() => setShowScanner(false)}
+      />
     </View>
   );
 }
@@ -387,28 +351,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: moderateScale(16),
     fontWeight: '600',
-  },
-  scannerContainer: {
-    flex: 1,
-  },
-  camera: {
-    flex: 1,
-  },
-  scannerOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scannerText: {
-    color: '#fff',
-    fontSize: moderateScale(20),
-    fontWeight: 'bold',
-    marginBottom: hp(3),
-  },
-  closeButton: {
-    position: 'absolute',
-    top: hp(6),
-    right: wp(5),
   },
 });
