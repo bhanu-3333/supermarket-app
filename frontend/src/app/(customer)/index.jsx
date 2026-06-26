@@ -5,26 +5,26 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Modal,
   SafeAreaView,
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import BarcodeScanner from '../../components/BarcodeScanner';
+import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
 import api from '../../utils/api';
 import { wp, hp, moderateScale } from '../../utils/responsive';
 
 export default function CustomerScanner() {
   const router = useRouter();
   const { user } = useAuth();
-  const [permission, requestPermission] = useCameraPermissions();
   const [showScanner, setShowScanner] = useState(false);
-  const [scanned, setScanned] = useState(false);
   const [cart, setCart] = useState([]);
   const [netWeight, setNetWeight] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [productToRemove, setProductToRemove] = useState(null);
 
   useEffect(() => {
     calculateTotals();
@@ -43,10 +43,7 @@ export default function CustomerScanner() {
     setGrandTotal(totalPrice);
   };
 
-  const handleBarcodeScanned = async ({ data }) => {
-    if (scanned) return;
-    setScanned(true);
-
+  const handleBarcodeScanned = async (data) => {
     try {
       const { data: response } = await api.get(`/products/barcode/${data}`, {
         headers: { Authorization: `Bearer ${user?.token}` },
@@ -61,8 +58,6 @@ export default function CustomerScanner() {
       }
     } catch (err) {
       Alert.alert('Error', 'Product not found in this store');
-    } finally {
-      setScanned(false);
     }
   };
 
@@ -86,24 +81,32 @@ export default function CustomerScanner() {
   };
 
   const decreaseQuantity = (productId) => {
-    const updatedCart = cart
-      .map((item) =>
+    const product = cart.find((item) => item._id === productId);
+    
+    if (product && product.quantity === 1) {
+      // Show confirmation modal before removing
+      setProductToRemove(productId);
+      setShowRemoveModal(true);
+    } else {
+      // Just decrease quantity
+      const updatedCart = cart.map((item) =>
         item._id === productId ? { ...item, quantity: item.quantity - 1 } : item
-      )
-      .filter((item) => item.quantity > 0);
-    setCart(updatedCart);
+      );
+      setCart(updatedCart);
+    }
   };
 
-  const openScanner = async () => {
-    if (!permission?.granted) {
-      const result = await requestPermission();
-      if (!result.granted) {
-        Alert.alert('Permission Required', 'Camera permission is required to scan barcodes');
-        return;
-      }
+  const confirmRemoveProduct = () => {
+    if (productToRemove) {
+      const updatedCart = cart.filter((item) => item._id !== productToRemove);
+      setCart(updatedCart);
+      setShowRemoveModal(false);
+      setProductToRemove(null);
     }
+  };
+
+  const openScanner = () => {
     setShowScanner(true);
-    setScanned(false);
   };
 
   const handleCheckout = () => {
@@ -195,32 +198,24 @@ export default function CustomerScanner() {
         </View>
       </ScrollView>
 
-      {/* Barcode Scanner Modal */}
-      <Modal visible={showScanner} animationType="slide">
-        <View style={styles.scannerContainer}>
-          <CameraView
-            style={styles.camera}
-            facing="back"
-            barcodeScannerSettings={{
-              barcodeTypes: ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'],
-            }}
-            onBarcodeScanned={handleBarcodeScanned}
-          >
-            <View style={styles.scannerOverlay}>
-              <Text style={styles.scannerText}>Scan Product Barcode</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => {
-                  setShowScanner(false);
-                  setScanned(false);
-                }}
-              >
-                <Ionicons name="close-circle" size={48} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </CameraView>
-        </View>
-      </Modal>
+      {/* Barcode Scanner */}
+      <BarcodeScanner
+        visible={showScanner}
+        onScan={handleBarcodeScanned}
+        onClose={() => setShowScanner(false)}
+      />
+
+      {/* Remove Product Confirmation Modal */}
+      <DeleteConfirmationModal
+        visible={showRemoveModal}
+        onConfirm={confirmRemoveProduct}
+        onCancel={() => {
+          setShowRemoveModal(false);
+          setProductToRemove(null);
+        }}
+        title="Are You Sure want to remove this Product from Cart?"
+        buttonText="Remove"
+      />
     </SafeAreaView>
   );
 }
@@ -442,28 +437,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: moderateScale(16),
     fontWeight: '600',
-  },
-  scannerContainer: {
-    flex: 1,
-  },
-  camera: {
-    flex: 1,
-  },
-  scannerOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scannerText: {
-    color: '#fff',
-    fontSize: moderateScale(20),
-    fontWeight: 'bold',
-    marginBottom: hp(3),
-  },
-  closeButton: {
-    position: 'absolute',
-    top: hp(6),
-    right: wp(5),
   },
 });
