@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   Platform,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -17,6 +18,7 @@ import api from '../../utils/api';
 import { wp, hp, moderateScale } from '../../utils/responsive';
 
 export default function AdminSales() {
+  const router = useRouter();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -58,8 +60,20 @@ export default function AdminSales() {
 
   const applyFilter = async () => {
     setShowFilterModal(false);
-    setLoading(true);
 
+    // Navigate to chart screens for yearly filters
+    if (filterType.sales === 'yearly') {
+      router.push('/(admin)/yearly-sales');
+      return;
+    }
+
+    if (filterType.customer === 'yearly') {
+      router.push('/(admin)/yearly-customer');
+      return;
+    }
+
+    // For other filters, fetch data
+    setLoading(true);
     try {
       let endpoint = '';
       
@@ -68,16 +82,12 @@ export default function AdminSales() {
         endpoint = '/admin/sales/today';
       } else if (filterType.sales === 'monthly') {
         endpoint = '/admin/sales/monthly';
-      } else if (filterType.sales === 'yearly') {
-        endpoint = '/admin/sales/yearly';
       }
       // Customer filters
       else if (filterType.customer === 'today') {
         endpoint = '/admin/customers/today';
       } else if (filterType.customer === 'monthly') {
         endpoint = '/admin/customers/monthly';
-      } else if (filterType.customer === 'yearly') {
-        endpoint = '/admin/customers/yearly';
       }
 
       if (endpoint) {
