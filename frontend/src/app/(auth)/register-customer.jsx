@@ -107,6 +107,13 @@ export default function RegisterCustomerScreen() {
         style={styles.bottomImage}
         resizeMode="contain"
       />
+      
+      {/* Trolley Watermark Background */}
+      <Image
+        source={require('../../../assets/images/trolly.png')}
+        style={styles.trolleyWatermark}
+        resizeMode="contain"
+      />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.brandTitle}>SmartCart</Text>
