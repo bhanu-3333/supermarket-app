@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  Image, KeyboardAvoidingView, Platform, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
@@ -81,16 +81,13 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <Image
-        source={require('../../../assets/images/top.png')}
-        style={styles.topImage}
-        resizeMode="contain"
-      />
-      <Image
-        source={require('../../../assets/images/bottom.png')}
-        style={styles.bottomImage}
-        resizeMode="contain"
-      />
+      {/* Decorative Background Elements */}
+      <View style={styles.bgCircle1} />
+      <View style={styles.bgCircle2} />
+      <View style={styles.bgCircle3} />
+      <View style={styles.bgShape1} />
+      <View style={styles.bgShape2} />
+      
       <View style={styles.content}>
         <Text style={styles.brandTitle}>SmartCart</Text>
         <View style={styles.formContainer}>
@@ -134,22 +131,56 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F7FA' },
-  topImage: { 
-    position: 'absolute', 
-    top: -hp(8), 
-    right: -wp(15), 
-    width: wp(isTablet ? 30 : 50), 
-    height: wp(isTablet ? 30 : 50), 
-    opacity: 0.35 
+  container: { 
+    flex: 1, 
+    backgroundColor: '#E8F3FB',
   },
-  bottomImage: { 
-    position: 'absolute', 
-    bottom: -hp(8), 
-    left: -wp(15), 
-    width: wp(isTablet ? 30 : 50), 
-    height: wp(isTablet ? 30 : 50), 
-    opacity: 0.35 
+  bgCircle1: {
+    position: 'absolute',
+    top: -hp(10),
+    left: -wp(20),
+    width: wp(60),
+    height: wp(60),
+    borderRadius: wp(30),
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  bgCircle2: {
+    position: 'absolute',
+    top: hp(10),
+    right: -wp(15),
+    width: wp(40),
+    height: wp(40),
+    borderRadius: wp(20),
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  bgCircle3: {
+    position: 'absolute',
+    bottom: hp(20),
+    left: -wp(10),
+    width: wp(50),
+    height: wp(50),
+    borderRadius: wp(25),
+    backgroundColor: 'rgba(176, 219, 252, 0.3)',
+  },
+  bgShape1: {
+    position: 'absolute',
+    bottom: -hp(5),
+    left: wp(10),
+    width: wp(30),
+    height: wp(30),
+    borderRadius: wp(15),
+    backgroundColor: 'rgba(190, 227, 255, 0.4)',
+    transform: [{ rotate: '45deg' }],
+  },
+  bgShape2: {
+    position: 'absolute',
+    bottom: hp(5),
+    right: wp(5),
+    width: wp(35),
+    height: wp(35),
+    borderRadius: wp(17.5),
+    backgroundColor: 'rgba(200, 235, 255, 0.3)',
+    transform: [{ rotate: '-30deg' }],
   },
   content: { 
     flex: 1, 
