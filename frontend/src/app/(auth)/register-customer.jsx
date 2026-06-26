@@ -14,34 +14,33 @@ import {
   Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useToast } from '../../context/ToastContext';
 import api from '../../utils/api';
 
 const { width, height } = Dimensions.get('window');
 
 export default function RegisterCustomerScreen() {
   const router = useRouter();
+  const toast = useToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [storeCode, setStoreCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleRegister = async () => {
-    setError('');
-
     if (!name || !email || !password || !storeCode) {
-      setError('Please fill in all fields');
+      toast.error('Missing Fields', 'Please fill in all fields');
       return;
     }
 
     if (!email.includes('@')) {
-      setError('Please enter a valid email address');
+      toast.error('Invalid Email', 'Please enter a valid email address');
       return;
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+      toast.error('Weak Password', 'Password must be at least 8 characters');
       return;
     }
 
@@ -56,23 +55,38 @@ export default function RegisterCustomerScreen() {
       });
 
       if (data.success) {
+        toast.success('Registration Successful', 'Welcome to SmartCart!');
+        
         Alert.alert(
-          'Success!',
-          `Welcome to ${data.data.storeName}!\n\nYou can now login and start shopping.`,
+          'Welcome!',
+          `You are now registered with ${data.data.storeName}!\n\nYou can now login and start shopping.`,
           [
             {
               text: 'OK',
-              onPress: () => router.push('/(auth)/login'),
+              onPress: () => {
+                setTimeout(() => {
+                  router.push('/(auth)/login');
+                }, 500);
+              },
             },
           ]
         );
       } else {
-        setError(data.message || 'Registration failed');
+        toast.error('Registration Failed', data.message || 'Unable to create account');
       }
     } catch (err) {
-      const errorMsg =
-        err.response?.data?.message || 'Network error. Please check your connection.';
-      setError(errorMsg);
+      if (err.response?.status === 400) {
+        const message = err.response?.data?.message || '';
+        if (message.includes('already exists')) {
+          toast.error('Email Already Registered', 'Please use a different email address');
+        } else if (message.includes('Invalid Store Code')) {
+          toast.error('Invalid Store Code', 'Please enter a valid supermarket code');
+        } else {
+          toast.error('Registration Failed', message);
+        }
+      } else {
+        toast.error('Server Error', 'Unable to connect to server');
+      }
     } finally {
       setIsLoading(false);
     }
