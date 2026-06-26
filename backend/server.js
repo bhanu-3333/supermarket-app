@@ -14,8 +14,37 @@ const app = express();
 // Body parser
 app.use(express.json());
 
-// Enable CORS
-app.use(cors());
+// Enable CORS for all origins (necessary for Expo Go and mobile development)
+app.use(cors({
+  origin: '*', // Allow all origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+
+// Log all incoming requests
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} - Origin: ${req.headers.origin || 'none'}`);
+  next();
+});
+
+// Health check endpoint
+app.get('/api', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'SmartCart API is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Server is healthy',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Mount routers
 const authRouter = require('./routes/auth');
@@ -36,4 +65,12 @@ app.use('/api/admin', adminRouter);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, console.log(`Server running on port ${PORT}`));
+// Listen on 0.0.0.0 to accept connections from any network interface
+// This allows mobile devices on the same network to connect
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Local: http://localhost:${PORT}`);
+  console.log(`Network: http://0.0.0.0:${PORT}`);
+  console.log(`\nFor Expo Go, use your machine's IP address`);
+  console.log(`Example: http://192.168.x.x:${PORT}/api`);
+});
