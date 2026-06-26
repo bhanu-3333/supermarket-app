@@ -97,15 +97,6 @@ export default function LoginScreen() {
       
       <View style={styles.content}>
         <Text style={styles.brandTitle}>SmartCart</Text>
-        
-        {/* Trolley Image */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={require('../../../assets/images/trolly.png')}
-            style={styles.trolleyImage}
-            resizeMode="contain"
-          />
-        </View>
 
         <View style={styles.formContainer}>
           <Text style={styles.label}>Email Id :</Text>
@@ -199,6 +190,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(200, 235, 255, 0.3)',
     transform: [{ rotate: '-30deg' }],
   },
+  trolleyWatermark: {
+    position: 'absolute',
+    bottom: hp(15),
+    left: wp(10),
+    width: wp(80),
+    height: wp(80),
+    opacity: 0.08,
+    zIndex: 1,
+  },
   content: { 
     flex: 1, 
     paddingHorizontal: wp(8), 
@@ -206,21 +206,14 @@ const styles = StyleSheet.create({
     maxWidth: isTablet ? 500 : '100%',
     alignSelf: 'center',
     width: '100%',
+    zIndex: 2,
   },
   brandTitle: { 
     fontSize: moderateScale(40), 
     fontWeight: 'bold', 
     color: '#0A3B7C', 
     textAlign: 'center', 
-    marginBottom: hp(3) 
-  },
-  imageContainer: {
-    alignItems: 'center',
-    marginBottom: hp(3),
-  },
-  trolleyImage: {
-    width: wp(isTablet ? 30 : 45),
-    height: wp(isTablet ? 30 : 45),
+    marginBottom: hp(6) 
   },
   formContainer: { width: '100%', zIndex: 10 },
   label: { fontSize: moderateScale(14), fontWeight: '600', color: '#111', marginBottom: hp(1), marginLeft: wp(1) },
