@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const QRCode = require('qrcode');
+const { protect } = require('../middleware/auth');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -153,6 +154,29 @@ router.post('/register-customer', async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   GET /api/auth/validate
+// @desc    Validate JWT token
+// @access  Private
+router.get('/validate', protect, async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      data: {
+        _id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+        storeName: req.user.storeName,
+        storeCode: req.user.storeCode,
+        storeId: req.user.storeId,
+      },
+    });
+  } catch (err) {
+    console.error('Validate error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
