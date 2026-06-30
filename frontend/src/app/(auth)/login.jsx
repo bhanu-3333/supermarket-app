@@ -81,13 +81,6 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Decorative Background Elements */}
-      <View style={styles.bgCircle1} />
-      <View style={styles.bgCircle2} />
-      <View style={styles.bgCircle3} />
-      <View style={styles.bgShape1} />
-      <View style={styles.bgShape2} />
-      
       {/* Trolley Watermark Background */}
       <Image
         source={require('../../../assets/images/trolly.png')}
@@ -143,60 +136,15 @@ const styles = StyleSheet.create({
     flex: 1, 
     backgroundColor: '#E8F3FB',
   },
-  bgCircle1: {
-    position: 'absolute',
-    top: -hp(10),
-    left: -wp(20),
-    width: wp(60),
-    height: wp(60),
-    borderRadius: wp(30),
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  bgCircle2: {
-    position: 'absolute',
-    top: hp(10),
-    right: -wp(15),
-    width: wp(40),
-    height: wp(40),
-    borderRadius: wp(20),
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  bgCircle3: {
-    position: 'absolute',
-    bottom: hp(20),
-    left: -wp(10),
-    width: wp(50),
-    height: wp(50),
-    borderRadius: wp(25),
-    backgroundColor: 'rgba(176, 219, 252, 0.3)',
-  },
-  bgShape1: {
-    position: 'absolute',
-    bottom: -hp(5),
-    left: wp(10),
-    width: wp(30),
-    height: wp(30),
-    borderRadius: wp(15),
-    backgroundColor: 'rgba(190, 227, 255, 0.4)',
-    transform: [{ rotate: '45deg' }],
-  },
-  bgShape2: {
-    position: 'absolute',
-    bottom: hp(5),
-    right: wp(5),
-    width: wp(35),
-    height: wp(35),
-    borderRadius: wp(17.5),
-    backgroundColor: 'rgba(200, 235, 255, 0.3)',
-    transform: [{ rotate: '-30deg' }],
-  },
   trolleyWatermark: {
     position: 'absolute',
-    bottom: hp(15),
-    left: wp(10),
-    width: wp(80),
-    height: wp(80),
-    opacity: 0.08,
+    top: '50%',
+    left: '50%',
+    width: wp(70),
+    height: wp(70),
+    marginTop: -(wp(70) / 2),
+    marginLeft: -(wp(70) / 2),
+    opacity: 0.15,
     zIndex: 1,
   },
   content: { 
