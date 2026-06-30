@@ -110,6 +110,9 @@ export default function CustomerProfile() {
         <TouchableOpacity style={styles.logoutButton} onPress={() => setShowLogoutModal(true)}>
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
+        
+        {/* Bottom Spacer for Navigation */}
+        <View style={styles.bottomSpacer} />
       </View>
 
       <LogoutModal
@@ -249,5 +252,8 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: moderateScale(16),
     fontWeight: '600',
+  },
+  bottomSpacer: {
+    height: hp(12),
   },
 });
