@@ -97,17 +97,6 @@ export default function RegisterCustomerScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <Image
-        source={require('../../../assets/images/top.png')}
-        style={styles.topImage}
-        resizeMode="contain"
-      />
-      <Image
-        source={require('../../../assets/images/bottom.png')}
-        style={styles.bottomImage}
-        resizeMode="contain"
-      />
-      
       {/* Trolley Watermark Background */}
       <Image
         source={require('../../../assets/images/trolly.png')}
@@ -193,21 +182,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F3F7FA',
   },
-  topImage: {
+  trolleyWatermark: {
     position: 'absolute',
-    top: -60,
-    right: -60,
-    width: width * 0.5,
-    height: width * 0.5,
-    opacity: 0.35,
-  },
-  bottomImage: {
-    position: 'absolute',
-    bottom: -60,
-    left: -60,
-    width: width * 0.5,
-    height: width * 0.5,
-    opacity: 0.35,
+    top: '50%',
+    left: '50%',
+    width: width * 0.7,
+    height: width * 0.7,
+    marginTop: -(width * 0.7 / 2),
+    marginLeft: -(width * 0.7 / 2),
+    opacity: 0.15,
+    zIndex: 1,
   },
   scrollContent: {
     flexGrow: 1,
@@ -215,6 +199,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: height * 0.08,
     paddingBottom: 40,
+    zIndex: 2,
   },
   brandTitle: {
     fontSize: Math.min(width * 0.1, 40),
