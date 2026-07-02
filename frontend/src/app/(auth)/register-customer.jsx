@@ -109,7 +109,6 @@ export default function RegisterCustomerScreen() {
         <Text style={styles.subtitle}>Join Supermarket</Text>
 
         <View style={styles.formContainer}>
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
           <Text style={styles.label}>Full Name :</Text>
           <TextInput
