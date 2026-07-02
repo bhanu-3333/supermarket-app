@@ -11,21 +11,10 @@ export default function AdminMore() {
   const { user, logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      console.log('[ADMIN LOGOUT] Starting logout...');
-      await logout();
-      console.log('[ADMIN LOGOUT] Logout complete, closing modal...');
-      setShowLogoutModal(false);
-      console.log('[ADMIN LOGOUT] Navigating to root...');
-      
-      // Use setTimeout to ensure modal closes first
-      setTimeout(() => {
-        router.replace('/');
-      }, 100);
-    } catch (error) {
-      console.error('[ADMIN LOGOUT] Logout error:', error);
-    }
+  const handleLogout = () => {
+    setShowLogoutModal(false);
+    logout();
+    router.replace('/');
   };
 
   const MenuItem = ({ iconImage, title, onPress, color = '#111' }) => (
