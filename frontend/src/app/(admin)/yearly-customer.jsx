@@ -104,16 +104,16 @@ export default function YearlyCustomerScreen() {
             <View style={styles.chartContainer}>
               <BarChart
                 data={chartData}
-                width={wp(80)}
-                height={hp(35)}
-                barWidth={moderateScale(50)}
-                spacing={moderateScale(30)}
+                width={wp(85)}
+                height={hp(30)}
+                barWidth={wp(12)}
+                spacing={wp(8)}
                 roundedTop
                 roundedBottom
                 hideRules
                 xAxisThickness={0}
                 yAxisThickness={0}
-                yAxisTextStyle={{ color: '#9CA3AF', fontSize: moderateScale(10) }}
+                yAxisTextStyle={{ color: '#9CA3AF', fontSize: moderateScale(9) }}
                 noOfSections={4}
                 maxValue={chartData.length > 0 ? Math.max(...chartData.map(d => d.value)) * 1.2 : 100}
                 showGradient={false}
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   storeName: {
     flex: 1,
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(22),
     fontWeight: 'bold',
     color: '#0A3B7C',
   },
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     marginRight: wp(1.5),
   },
   badgeText: {
-    fontSize: moderateScale(11),
+    fontSize: moderateScale(10),
     fontWeight: '700',
     color: '#0A3B7C',
     letterSpacing: 0.5,
@@ -227,10 +227,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
   },
   chartTitle: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(16),
     fontWeight: 'bold',
     color: '#111827',
-    marginBottom: hp(2.5),
+    marginBottom: hp(2),
   },
   loader: {
     marginTop: hp(10),
@@ -248,8 +248,8 @@ const styles = StyleSheet.create({
   chartContainer: {
     backgroundColor: '#fff',
     borderRadius: moderateScale(16),
-    padding: wp(4),
-    marginBottom: hp(3),
+    padding: wp(2),
+    marginBottom: hp(2),
     alignItems: 'center',
     elevation: 2,
     shadowColor: '#000',
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   legendContainer: {
     backgroundColor: '#fff',
     borderRadius: moderateScale(16),
-    padding: wp(5),
+    padding: wp(4),
     elevation: 2,
     shadowColor: '#000',
     shadowOpacity: 0.08,
@@ -270,22 +270,22 @@ const styles = StyleSheet.create({
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: hp(1.5),
+    marginBottom: hp(1.2),
   },
   legendDot: {
-    width: moderateScale(16),
-    height: moderateScale(16),
-    borderRadius: moderateScale(8),
-    marginRight: wp(3),
+    width: moderateScale(12),
+    height: moderateScale(12),
+    borderRadius: moderateScale(6),
+    marginRight: wp(2.5),
   },
   legendYear: {
     flex: 1,
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(14),
     fontWeight: '600',
     color: '#111827',
   },
   legendValue: {
-    fontSize: moderateScale(16),
+    fontSize: moderateScale(14),
     fontWeight: 'bold',
     color: '#111827',
   },
