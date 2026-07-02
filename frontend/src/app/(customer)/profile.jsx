@@ -11,21 +11,10 @@ export default function CustomerProfile() {
   const { user, logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      console.log('[CUSTOMER LOGOUT] Starting logout...');
-      const success = await logout();
-      console.log('[CUSTOMER LOGOUT] Logout result:', success);
-      setShowLogoutModal(false);
-      
-      // Add small delay to ensure state updates
-      setTimeout(() => {
-        console.log('[CUSTOMER LOGOUT] Navigating to root...');
-        router.replace('/');
-      }, 100);
-    } catch (error) {
-      console.error('[CUSTOMER LOGOUT] Logout error:', error);
-    }
+  const handleLogout = () => {
+    setShowLogoutModal(false);
+    logout();
+    router.replace('/');
   };
 
   const menuItems = [
