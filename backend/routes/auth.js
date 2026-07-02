@@ -39,15 +39,11 @@ router.post('/register-admin', async (req, res) => {
       storeName,
       storeCode,
       storeQR,
+      storeId: null, // will be set below
     });
 
-    // Set storeId to self for admin (they own the store)
-    user.storeId = user._id;
-    await user.save();
-
-    // Set storeId to self for admin
-    user.storeId = user._id;
-    await user.save();
+    // Set storeId to self — use updateOne to skip the pre-save password hook
+    await User.updateOne({ _id: user._id }, { storeId: user._id });
 
     res.status(201).json({
       success: true,
