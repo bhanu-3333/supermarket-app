@@ -38,7 +38,7 @@ export default function StaffAdd() {
       });
       
       if (response.data.success) {
-        Alert.alert('Error', 'Product barcode already exists');
+        toast.error('Duplicate Barcode', 'Product barcode already exists');
         return;
       }
     } catch (err) {
@@ -47,7 +47,7 @@ export default function StaffAdd() {
         setFormData({ ...formData, barcode: data });
         setShowScanner(false);
       } else {
-        Alert.alert('Error', 'Failed to validate barcode');
+        toast.error('Validation Failed', 'Failed to validate barcode');
       }
     }
   };
@@ -58,23 +58,23 @@ export default function StaffAdd() {
 
   const validateForm = () => {
     if (!formData.barcode.trim()) {
-      Alert.alert('Error', 'Please enter or scan a barcode');
+      toast.error('Missing Barcode', 'Please enter or scan a barcode');
       return false;
     }
     if (!formData.productName.trim()) {
-      Alert.alert('Error', 'Please enter product name');
+      toast.error('Missing Product Name', 'Please enter product name');
       return false;
     }
     if (!formData.price || parseFloat(formData.price) <= 0) {
-      Alert.alert('Error', 'Please enter a valid price');
+      toast.error('Invalid Price', 'Please enter a valid price');
       return false;
     }
     if (!formData.stockQuantity || parseInt(formData.stockQuantity) <= 0) {
-      Alert.alert('Error', 'Please enter a valid stock quantity');
+      toast.error('Invalid Stock', 'Please enter a valid stock quantity');
       return false;
     }
     if (!formData.weight || parseFloat(formData.weight) <= 0) {
-      Alert.alert('Error', 'Please enter a valid weight');
+      toast.error('Invalid Weight', 'Please enter a valid weight');
       return false;
     }
     return true;
@@ -101,26 +101,20 @@ export default function StaffAdd() {
       );
 
       if (response.data.success) {
-        Alert.alert('Success', 'Product added successfully!', [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Clear form
-              setFormData({
-                barcode: '',
-                productName: '',
-                price: '',
-                stockQuantity: '',
-                weight: '',
-                weightUnit: 'Kg',
-              });
-            },
-          },
-        ]);
+        toast.success('Success', 'Product added successfully!');
+        // Clear form
+        setFormData({
+          barcode: '',
+          productName: '',
+          price: '',
+          stockQuantity: '',
+          weight: '',
+          weightUnit: 'Kg',
+        });
       }
     } catch (err) {
-      Alert.alert(
-        'Error',
+      toast.error(
+        'Failed to Add Product',
         err.response?.data?.message || 'Failed to add product'
       );
     } finally {
