@@ -5,10 +5,12 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { Ionicons } from '@expo/vector-icons';
 import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function StaffDashboard() {
   const router = useRouter();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [stats, setStats] = useState({ totalStock: 0, lowStock: 0, recentProducts: [] });
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +57,10 @@ export default function StaffDashboard() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView 
+      style={styles.container} 
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + hp(2) }]}
+    >
       <View style={styles.header}>
         <Text style={styles.storeName}>{user?.storeName || 'Store'}</Text>
         <View style={styles.badge}>
