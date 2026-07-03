@@ -4,9 +4,11 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { Ionicons } from '@expo/vector-icons';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function StaffStock() {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -187,7 +189,7 @@ export default function StaffStock() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.storeName}>{user?.storeName || 'Store'}</Text>
         <View style={styles.badge}>
@@ -307,7 +309,7 @@ export default function StaffStock() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 20, paddingTop: 40 },
+  container: { flex: 1, backgroundColor: '#fff', padding: 20, paddingTop: 20 },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
   storeName: { fontSize: 26, fontWeight: 'bold', color: '#0A3B7C' },
