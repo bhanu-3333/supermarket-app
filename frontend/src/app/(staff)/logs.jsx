@@ -5,16 +5,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 import { useState } from 'react';
 import LogoutModal from '../../components/LogoutModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function StaffLogs() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const insets = useSafeAreaInsets();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
     setShowLogoutModal(false);
-    logout();
     router.replace('/');
+    logout();
   };
 
   const menuItems = [
@@ -46,7 +48,7 @@ export default function StaffLogs() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
+      <View style={[styles.content, { paddingTop: insets.top + hp(2) }]}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.storeName}>{user?.storeName || 'Store'}</Text>
@@ -101,6 +103,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: wp(5),
+    paddingTop: 0,
     maxWidth: isTablet ? 600 : '100%',
     alignSelf: 'center',
     width: '100%',
@@ -109,7 +112,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: hp(2.5),
     marginBottom: hp(4),
   },
   storeName: {
