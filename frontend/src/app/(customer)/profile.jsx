@@ -1,20 +1,22 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 import { useState } from 'react';
 import LogoutModal from '../../components/LogoutModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CustomerProfile() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const insets = useSafeAreaInsets();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
     setShowLogoutModal(false);
-    logout();
     router.replace('/');
+    logout();
   };
 
   const menuItems = [
@@ -52,7 +54,11 @@ export default function CustomerProfile() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + hp(1.5) }]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.storeName}>{user?.storeName || 'SmartCart'}</Text>
@@ -99,10 +105,7 @@ export default function CustomerProfile() {
         <TouchableOpacity style={styles.logoutButton} onPress={() => setShowLogoutModal(true)}>
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
-        
-        {/* Bottom Spacer for Navigation */}
-        <View style={styles.bottomSpacer} />
-      </View>
+      </ScrollView>
 
       <LogoutModal
         visible={showLogoutModal}
@@ -115,9 +118,10 @@ export default function CustomerProfile() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F7FA' },
+  scroll: { flex: 1 },
   content: {
-    flex: 1,
     padding: wp(5),
+    paddingBottom: hp(12),
     maxWidth: isTablet ? 600 : '100%',
     alignSelf: 'center',
     width: '100%',
@@ -126,7 +130,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: hp(2.5),
     marginBottom: hp(3),
   },
   storeName: {
@@ -186,7 +189,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   menuContainer: {
-    flex: 1,
+    // no flex:1 — let it size naturally so logout button flows below
   },
   menuItem: {
     flexDirection: 'row',
@@ -235,14 +238,10 @@ const styles = StyleSheet.create({
     paddingVertical: hp(1.8),
     alignItems: 'center',
     marginTop: hp(2),
-    marginBottom: hp(3),
   },
   logoutText: {
     color: '#fff',
     fontSize: moderateScale(16),
     fontWeight: '600',
-  },
-  bottomSpacer: {
-    height: hp(12),
   },
 });
