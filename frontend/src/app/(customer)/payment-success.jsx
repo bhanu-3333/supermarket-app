@@ -1,21 +1,24 @@
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
 import api from '../../utils/api';
 import { wp, hp, moderateScale } from '../../utils/responsive';
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 export default function PaymentSuccessScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const params = useLocalSearchParams();
-  const [creating, setCreating] = useState(false);
+  const hasCreated = useRef(false);
 
-  const handleRedirectToOrder = async () => {
-    if (creating) return;
-    setCreating(true);
+  useEffect(() => {
+    createOrder();
+  }, []);
 
+  const createOrder = async () => {
+    if (hasCreated.current) return;
+    hasCreated.current = true;
     try {
       const cart = JSON.parse(params.cart);
       const orderItems = cart.map((item) => ({
@@ -25,41 +28,31 @@ export default function PaymentSuccessScreen() {
         price: item.price,
         weight: item.weight,
       }));
-
-      const totalWeight = parseFloat(params.weight);
-      const totalPrice = parseFloat(params.total);
-
-      const { data } = await api.post(
+      await api.post(
         '/orders',
         {
           orderItems,
-          totalWeight,
+          totalWeight: parseFloat(params.weight),
           taxPrice: 0,
-          totalPrice,
+          totalPrice: parseFloat(params.total),
           paymentMethod: 'UPI',
         },
-        {
-          headers: { Authorization: `Bearer ${user?.token}` },
-        }
+        { headers: { Authorization: `Bearer ${user?.token}` } }
       );
-
-      if (data.success) {
-        router.replace({
-          pathname: '/(customer)/order-summary',
-          params: {
-            orderId: data.data._id,
-            cart: params.cart,
-            total: params.total,
-            weight: params.weight,
-          },
-        });
-      }
     } catch (err) {
-      Alert.alert('Error', 'Failed to create order');
-      console.error(err);
-    } finally {
-      setCreating(false);
+      console.error('Order creation error:', err);
     }
+  };
+
+  const handleGoToOrderPage = () => {
+    router.replace({
+      pathname: '/(customer)/order-summary',
+      params: {
+        cart: params.cart,
+        total: params.total,
+        weight: params.weight,
+      },
+    });
   };
 
   return (
@@ -74,26 +67,18 @@ export default function PaymentSuccessScreen() {
           </View>
         </View>
 
+        {/* Centered content */}
         <View style={styles.content}>
           <Text style={styles.successTitle}>Payment successful</Text>
 
-          <View style={styles.iconContainer}>
-            <View style={styles.successIcon}>
-              <Ionicons name="card-outline" size={80} color="#111" />
-              <View style={styles.checkmark}>
-                <Ionicons name="checkmark" size={40} color="#10b981" />
-              </View>
-            </View>
-          </View>
+          <Image
+            source={require('../../../assets/images/payment success.png')}
+            style={styles.successImage}
+            resizeMode="contain"
+          />
 
-          <TouchableOpacity
-            style={styles.redirectButton}
-            onPress={handleRedirectToOrder}
-            disabled={creating}
-          >
-            <Text style={styles.redirectButtonText}>
-              {creating ? 'Creating Order...' : 'Redirect to Order page'}
-            </Text>
+          <TouchableOpacity style={styles.homeButton} onPress={handleGoToOrderPage}>
+            <Text style={styles.homeButtonText}>Redirect to Order page</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -102,22 +87,16 @@ export default function PaymentSuccessScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  container: {
-    flex: 1,
-    padding: wp(5),
-  },
+  safeArea: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, padding: wp(5) },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: hp(4),
+    marginBottom: hp(2),
   },
   storeName: {
-    fontSize: moderateScale(28),
+    fontSize: moderateScale(26),
     fontWeight: 'bold',
     color: '#0A3B7C',
   },
@@ -146,43 +125,28 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: wp(5),
   },
   successTitle: {
     fontSize: moderateScale(26),
     fontWeight: 'bold',
     color: '#111',
     marginBottom: hp(5),
+    textAlign: 'center',
   },
-  iconContainer: {
-    marginBottom: hp(8),
+  successImage: {
+    width: wp(45),
+    height: wp(45),
+    marginBottom: hp(6),
   },
-  successIcon: {
-    position: 'relative',
-  },
-  checkmark: {
-    position: 'absolute',
-    bottom: -10,
-    right: -10,
-    width: moderateScale(50),
-    height: moderateScale(50),
-    borderRadius: moderateScale(25),
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-  },
-  redirectButton: {
+  homeButton: {
     backgroundColor: '#123F7A',
-    borderRadius: moderateScale(25),
+    borderRadius: moderateScale(30),
     paddingVertical: hp(1.8),
-    paddingHorizontal: wp(10),
     alignItems: 'center',
+    width: '100%',
   },
-  redirectButtonText: {
+  homeButtonText: {
     color: '#fff',
     fontSize: moderateScale(16),
     fontWeight: '600',
