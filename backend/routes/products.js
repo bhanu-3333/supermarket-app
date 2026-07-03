@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
+const User = require('../models/User');
 const { protect, authorize } = require('../middleware/auth');
 
 // @route   GET /api/products/barcode/:barcode
@@ -8,15 +9,52 @@ const { protect, authorize } = require('../middleware/auth');
 // @access  Private (All authenticated users)
 router.get('/barcode/:barcode', protect, async (req, res) => {
   try {
-    const product = await Product.findOne({ 
-      barcode: req.params.barcode,
+    const barcode = req.params.barcode.trim();
+    console.log('[BARCODE] Looking up barcode:', barcode, '| length:', barcode.length);
+    console.log('[BARCODE] User storeId:', req.user.storeId, '| storeCode:', req.user.storeCode, '| role:', req.user.role);
+
+    // Primary lookup: by barcode + storeId
+    let product = await Product.findOne({ 
+      barcode,
       storeId: req.user.storeId 
     });
-    
+
+    // Fallback: if customer's storeId doesn't match, try finding by storeCode
+    // This handles cases where storeId was saved differently
+    if (!product && req.user.storeCode) {
+      const admin = await User.findOne({ 
+        storeCode: req.user.storeCode, 
+        role: 'admin' 
+      });
+      if (admin && admin._id.toString() !== req.user.storeId?.toString()) {
+        console.log('[BARCODE] Trying fallback with admin storeId:', admin._id);
+        product = await Product.findOne({ 
+          barcode,
+          storeId: admin._id
+        });
+        if (product) {
+          // Fix the user's storeId to match admin's _id going forward
+          console.log('[BARCODE] Found via fallback — fixing storeId mismatch for user:', req.user._id);
+          await User.updateOne({ _id: req.user._id }, { storeId: admin._id });
+        }
+      }
+    }
+
     if (!product) {
+      const anyProduct = await Product.findOne({ barcode });
+      if (anyProduct) {
+        console.log('[BARCODE] Mismatch! Product storeId:', anyProduct.storeId, '| User storeId:', req.user.storeId);
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Product not found in your store',
+          debug: { productStoreId: anyProduct.storeId, userStoreId: req.user.storeId }
+        });
+      }
+      console.log('[BARCODE] Product does not exist in DB at all');
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
     
+    console.log('[BARCODE] Product found:', product.name);
     res.json({ success: true, data: product });
   } catch (err) {
     console.error('Barcode lookup error:', err);
@@ -84,7 +122,8 @@ router.get('/filter', protect, authorize('staff', 'admin'), async (req, res) => 
 // @access  Private (Staff/Admin)
 router.post('/', protect, authorize('staff', 'admin'), async (req, res) => {
   try {
-    const { barcode, name, price, stockQuantity, weight, weightUnit, category, description } = req.body;
+    const { barcode: rawBarcode, name, price, stockQuantity, weight, weightUnit, category, description } = req.body;
+    const barcode = rawBarcode?.toString().trim();
     
     if (!barcode || !name || !price || !stockQuantity || !weight || !weightUnit) {
       return res.status(400).json({ success: false, message: 'Please provide all required fields' });
@@ -107,7 +146,8 @@ router.post('/', protect, authorize('staff', 'admin'), async (req, res) => {
       storeId: req.user.storeId,
       createdBy: req.user._id
     });
-    
+
+    console.log('[PRODUCT] Created barcode:', product.barcode, '| length:', product.barcode.length, '| storeId:', product.storeId);
     res.status(201).json({ success: true, data: product });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
