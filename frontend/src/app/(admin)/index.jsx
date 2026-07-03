@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, ActivityIndicator, SafeAreaView, Image,
+  View, Text, StyleSheet, ScrollView, ActivityIndicator, Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
 import { wp, hp, moderateScale } from '../../utils/responsive';
