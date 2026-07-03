@@ -108,6 +108,15 @@ router.post('/', protect, async (req, res) => {
     if (!orderItems || orderItems.length === 0) {
       return res.status(400).json({ success: false, message: 'No order items' });
     }
+
+    // Deduct stock for each ordered product
+    const Product = require('../models/Product');
+    for (const item of orderItems) {
+      await Product.findByIdAndUpdate(
+        item.product,
+        { $inc: { stockQuantity: -item.quantity } }
+      );
+    }
     
     const order = await Order.create({
       user: req.user._id,
