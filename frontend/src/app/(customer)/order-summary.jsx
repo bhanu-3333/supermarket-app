@@ -4,8 +4,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -64,7 +64,10 @@ export default function OrderSummaryScreen() {
           </View>
           <TouchableOpacity
             style={styles.homeButton}
-            onPress={() => router.replace('/(customer)')}
+            onPress={() => router.replace({
+              pathname: '/(customer)',
+              params: { reset: Date.now().toString() },
+            })}
           >
             <Text style={styles.homeButtonText}>Redirect to Home</Text>
           </TouchableOpacity>
