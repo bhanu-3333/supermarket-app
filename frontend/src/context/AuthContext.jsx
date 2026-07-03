@@ -27,49 +27,20 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const clearAllStorage = async () => {
-    try {
-      // Clear specific keys only - much faster than getAllKeys
-      const keysToRemove = [
-        'smartcart_user',
-        'token',
-        'user',
-        'role',
-        'storeId',
-        'cart'
-      ];
-      
-      AsyncStorage.multiRemove(keysToRemove); // Don't await - fire and forget
-      
-      // Clear web storage if running on web
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-        window.localStorage.clear();
-        window.sessionStorage.clear();
-      }
-      
-      setUser(null);
-    } catch (error) {
-      console.error('[AUTH] Clear storage error:', error);
-    }
-  };
 
   const login = async (userData) => {
     await AsyncStorage.setItem('smartcart_user', JSON.stringify(userData));
     setUser(userData);
   };
 
-  const logout = async () => {
-    try {
-      // Clear user state immediately for instant UI update
-      setUser(null);
-      
-      // Clear storage in background (don't await)
-      clearAllStorage();
-      
-      return true;
-    } catch (error) {
-      console.error('[AUTH] Logout error:', error);
-      return false;
+  const logout = () => {
+    // Synchronous state clear — UI updates instantly
+    setUser(null);
+    // Clear storage in background — don't block navigation
+    AsyncStorage.multiRemove(['smartcart_user', 'token', 'user', 'role', 'storeId', 'cart']);
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
     }
   };
 
