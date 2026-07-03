@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   Alert,
+  TextInput,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import BarcodeScanner from '../../components/BarcodeScanner';
@@ -19,12 +20,25 @@ import { wp, hp, moderateScale } from '../../utils/responsive';
 export default function CustomerScanner() {
   const router = useRouter();
   const { user } = useAuth();
+  const params = useLocalSearchParams();
   const [showScanner, setShowScanner] = useState(false);
   const [cart, setCart] = useState([]);
   const [netWeight, setNetWeight] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [productToRemove, setProductToRemove] = useState(null);
+  const [manualBarcode, setManualBarcode] = useState('');
+  const lastResetParam = useRef(null);
+
+  // Clear cart when redirected from payment success (params.reset changes)
+  useEffect(() => {
+    if (params.reset && params.reset !== lastResetParam.current) {
+      lastResetParam.current = params.reset;
+      setCart([]);
+      setNetWeight(0);
+      setGrandTotal(0);
+    }
+  }, [params.reset]);
 
   useEffect(() => {
     calculateTotals();
@@ -45,20 +59,50 @@ export default function CustomerScanner() {
 
   const handleBarcodeScanned = async (data) => {
     try {
+      console.log('[SCAN] Scanning barcode:', data);
+      console.log('[SCAN] User token:', user?.token ? 'present' : 'MISSING');
+      console.log('[SCAN] User storeId:', user?.storeId);
+      
       const { data: response } = await api.get(`/products/barcode/${data}`, {
         headers: { Authorization: `Bearer ${user?.token}` },
       });
-
+      
+      console.log('[SCAN] Response:', response);
+      
       if (response.success) {
         const product = response.data;
         addToCart(product);
         setShowScanner(false);
+        Alert.alert('Added!', `${product.name} added to cart`);
       } else {
-        Alert.alert('Error', 'Product not found');
+        Alert.alert('Not Found', 'Product not found in this store');
       }
     } catch (err) {
-      Alert.alert('Error', 'Product not found in this store');
+      const errData = err.response?.data;
+      console.error('[SCAN] Error:', err.response?.status, errData || err.message);
+      // Log storeId mismatch debug info if present
+      if (errData?.debug) {
+        console.error('[SCAN] StoreId mismatch - Product storeId:', errData.debug.productStoreId, '| Customer storeId:', errData.debug.userStoreId);
+      }
+      if (err.response?.status === 401) {
+        Alert.alert('Session Expired', 'Please log out and log back in');
+      } else if (err.response?.status === 404) {
+        if (errData?.debug) {
+          Alert.alert('Store Mismatch', `Product exists but belongs to a different store.\nProduct store: ${errData.debug.productStoreId}\nYour store: ${errData.debug.userStoreId}`);
+        } else {
+          Alert.alert('Not Found', 'Product not found. Ask staff to add it first.');
+        }
+      } else {
+        Alert.alert('Error', `Failed: ${errData?.message || err.message}`);
+      }
     }
+  };
+
+  const handleManualAdd = async () => {
+    const barcode = manualBarcode.trim();
+    if (!barcode) return;
+    setManualBarcode('');
+    await handleBarcodeScanned(barcode);
   };
 
   const addToCart = (product) => {
@@ -111,7 +155,7 @@ export default function CustomerScanner() {
 
   const handleCheckout = () => {
     if (cart.length === 0) {
-      Alert.alert('Empty Cart', 'Please add products to cart before checkout');
+      Alert.alert('Empty Cart', 'Please scan a product first before checkout');
       return;
     }
     router.push({
@@ -133,7 +177,7 @@ export default function CustomerScanner() {
         </View>
 
         {/* Scanner Area */}
-        <TouchableOpacity style={styles.scannerArea} onPress={openScanner}>
+        <TouchableOpacity style={styles.scannerArea} onPress={openScanner} activeOpacity={0.7}>
           <View style={styles.scannerFrame}>
             <View style={styles.cornerTL} />
             <View style={styles.cornerTR} />
@@ -141,13 +185,30 @@ export default function CustomerScanner() {
             <View style={styles.cornerBR} />
             <Ionicons name="qr-code-outline" size={120} color="#111" />
           </View>
+          <Text style={styles.tapToScanText}>Tap to scan a product</Text>
         </TouchableOpacity>
 
+        {/* Manual barcode entry */}
+        <View style={styles.manualRow}>
+          <TextInput
+            style={styles.manualInput}
+            placeholder="Or enter barcode manually..."
+            placeholderTextColor="#aaa"
+            value={manualBarcode}
+            onChangeText={setManualBarcode}
+            keyboardType="default"
+            returnKeyType="search"
+            onSubmitEditing={handleManualAdd}
+          />
+          <TouchableOpacity style={styles.manualBtn} onPress={handleManualAdd}>
+            <Ionicons name="add" size={22} color="#fff" />
+          </TouchableOpacity>
+        </View>
         {/* Your Cart Section */}
         <Text style={styles.cartTitle}>Your Cart</Text>
 
         {cart.length === 0 ? (
-          <Text style={styles.emptyText}>Add your product by scanning!</Text>
+          <Text style={styles.emptyText}>Scan a product barcode above to add it to your cart</Text>
         ) : (
           cart.map((item) => (
             <View key={item._id} style={styles.cartItem}>
@@ -192,9 +253,16 @@ export default function CustomerScanner() {
             <Text style={styles.totalLabel}>Grand total</Text>
             <Text style={styles.totalValue}>${grandTotal.toFixed(2)}</Text>
           </View>
-          <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
-            <Text style={styles.checkoutButtonText}>Checkout</Text>
-          </TouchableOpacity>
+          {cart.length === 0 ? (
+            <TouchableOpacity style={styles.scanFirstButton} onPress={openScanner}>
+              <Ionicons name="scan-outline" size={20} color="#fff" />
+              <Text style={styles.checkoutButtonText}>  Scan Product First</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
+              <Text style={styles.checkoutButtonText}>Checkout ({cart.length} items)</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
 
@@ -230,7 +298,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: wp(5),
-    paddingBottom: hp(12),
+    paddingBottom: hp(20),
   },
   header: {
     flexDirection: 'row',
@@ -326,6 +394,36 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     marginVertical: hp(3),
+  },
+  tapToScanText: {
+    fontSize: moderateScale(13),
+    color: '#123F7A',
+    fontWeight: '600',
+    marginTop: hp(1.5),
+    textAlign: 'center',
+  },
+  manualRow: {
+    flexDirection: 'row',
+    gap: wp(2),
+    marginBottom: hp(2),
+  },
+  manualInput: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: moderateScale(12),
+    paddingHorizontal: wp(4),
+    paddingVertical: hp(1.4),
+    fontSize: moderateScale(14),
+    color: '#111',
+  },
+  manualBtn: {
+    width: moderateScale(48),
+    backgroundColor: '#123F7A',
+    borderRadius: moderateScale(12),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cartItem: {
     flexDirection: 'row',
@@ -432,6 +530,16 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(25),
     paddingVertical: hp(1.8),
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  scanFirstButton: {
+    backgroundColor: '#123F7A',
+    borderRadius: moderateScale(25),
+    paddingVertical: hp(1.8),
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   checkoutButtonText: {
     color: '#fff',
