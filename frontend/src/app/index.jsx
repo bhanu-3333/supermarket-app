@@ -10,13 +10,14 @@ export default function WelcomeScreen() {
   const router = useRouter();
   const { user, loading } = useAuth();
 
-  // Redirect based on user role
+  // Only redirect if user exists AND we're not in the middle of a logout
   if (!loading && user) {
     if (user.role === 'admin') return <Redirect href="/(admin)" />;
     if (user.role === 'staff') return <Redirect href="/(staff)" />;
     return <Redirect href="/(customer)" />;
   }
 
+  // Show nothing while checking auth
   if (loading) return null;
 
   return (
