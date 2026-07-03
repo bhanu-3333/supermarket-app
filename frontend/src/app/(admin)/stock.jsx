@@ -8,9 +8,9 @@ import {
   FlatList,
   ActivityIndicator,
   Modal,
-  SafeAreaView,
   RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../../utils/api';
