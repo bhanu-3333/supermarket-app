@@ -145,6 +145,7 @@ router.post('/register-customer', async (req, res) => {
         role: user.role,
         storeName: user.storeName,
         storeCode: user.storeCode,
+        storeId: user.storeId,
         token: generateToken(user._id),
       },
     });
@@ -173,6 +174,32 @@ router.get('/validate', protect, async (req, res) => {
     });
   } catch (err) {
     console.error('Validate error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password for existing user (dev utility)
+// @access  Public (remove in production)
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Use updateOne with bcrypt directly to avoid triggering pre-save hook issues
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await User.updateOne({ email }, { password: hashedPassword });
+
+    res.json({ success: true, message: 'Password reset successfully' });
+  } catch (err) {
+    console.error('Reset password error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
