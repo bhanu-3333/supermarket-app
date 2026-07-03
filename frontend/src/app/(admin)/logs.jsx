@@ -5,16 +5,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 import { useState } from 'react';
 import LogoutModal from '../../components/LogoutModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function AdminMore() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const insets = useSafeAreaInsets();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
     setShowLogoutModal(false);
-    logout();
     router.replace('/');
+    logout();
   };
 
   const MenuItem = ({ iconImage, title, onPress, color = '#111' }) => (
@@ -35,7 +37,7 @@ export default function AdminMore() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + hp(1.5) }]}>
         <Text style={styles.headerTitle}>Logs</Text>
       </View>
 
@@ -102,7 +104,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F7FA' },
   header: {
     paddingHorizontal: wp(5),
-    paddingTop: hp(6),
     paddingBottom: hp(2.5),
     backgroundColor: '#fff',
   },
