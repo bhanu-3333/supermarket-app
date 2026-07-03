@@ -14,10 +14,12 @@ import { Ionicons } from '@expo/vector-icons';
 import BarcodeScanner from '../../components/BarcodeScanner';
 import api from '../../utils/api';
 import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function StaffAdd() {
   const { user } = useAuth();
   const toast = useToast();
+  const insets = useSafeAreaInsets();
   const [showScanner, setShowScanner] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -126,7 +128,7 @@ export default function StaffAdd() {
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + hp(2) }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
@@ -254,7 +256,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: hp(2.5),
     marginBottom: hp(2),
   },
   storeName: {
