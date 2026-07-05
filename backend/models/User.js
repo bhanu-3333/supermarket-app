@@ -15,6 +15,20 @@ const UserSchema = new mongoose.Schema({
       'Please add a valid email',
     ],
   },
+  phone: {
+    type: String,
+    required: function() {
+      return this.role === 'customer';
+    },
+    validate: {
+      validator: function(v) {
+        // Only validate phone for customers
+        if (this.role !== 'customer') return true;
+        return /^[0-9]{10}$/.test(v);
+      },
+      message: 'Please add a valid 10-digit phone number'
+    }
+  },
   role: {
     type: String,
     enum: ['customer', 'staff', 'admin'],
