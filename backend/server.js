@@ -14,6 +14,12 @@ const app = express();
 // Body parser
 app.use(express.json());
 
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`[API] ${req.method} ${req.url}`);
+  next();
+});
+
 // Enable CORS for all origins (necessary for Expo Go and mobile development)
 app.use(cors({
   origin: '*', // Allow all origins
