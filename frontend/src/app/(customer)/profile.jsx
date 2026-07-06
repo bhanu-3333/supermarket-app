@@ -6,9 +6,12 @@ import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 import { useState } from 'react';
 import LogoutModal from '../../components/LogoutModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CommonActions } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function CustomerProfile() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { user, logout } = useAuth();
   const insets = useSafeAreaInsets();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -17,19 +20,31 @@ export default function CustomerProfile() {
     setShowLogoutModal(false);
     
     try {
+      // Clear authentication state first
       await logout();
-      console.log('Logout completed, navigating to home...');
+      console.log('Logout completed, resetting navigation stack...');
       
-      // Try multiple navigation approaches
-      if (router.canGoBack()) {
-        router.dismissAll();
-      }
-      router.replace('/');
+      // Reset navigation stack completely - this removes ALL screens from history
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'index', // This should be the Get Started screen
+            },
+          ],
+        })
+      );
       
     } catch (error) {
       console.error('Logout error:', error);
-      // Force navigation even if logout fails
-      router.replace('/');
+      // Force navigation reset even if logout fails
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'index' }],
+        })
+      );
     }
   };
 
