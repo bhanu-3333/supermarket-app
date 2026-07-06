@@ -59,41 +59,24 @@ export default function CustomerScanner() {
 
   const handleBarcodeScanned = async (data) => {
     try {
-      console.log('[SCAN] Scanning barcode:', data);
-      console.log('[SCAN] User token:', user?.token ? 'present' : 'MISSING');
-      console.log('[SCAN] User storeId:', user?.storeId);
-      
-      const { data: response } = await api.get(`/products/barcode/${data}`, {
-        headers: { Authorization: `Bearer ${user?.token}` },
-      });
-      
-      console.log('[SCAN] Response:', response);
-      
+      const { data: response } = await api.get(`/products/barcode/${data}`);
       if (response.success) {
-        const product = response.data;
-        addToCart(product);
+        addToCart(response.data);
         setShowScanner(false);
-        Alert.alert('Added!', `${product.name} added to cart`);
-      } else {
-        Alert.alert('Not Found', 'Product not found in this store');
+        Alert.alert('Added!', `${response.data.name} added to cart`);
       }
     } catch (err) {
-      const errData = err.response?.data;
-      console.error('[SCAN] Error:', err.response?.status, errData || err.message);
-      // Log storeId mismatch debug info if present
-      if (errData?.debug) {
-        console.error('[SCAN] StoreId mismatch - Product storeId:', errData.debug.productStoreId, '| Customer storeId:', errData.debug.userStoreId);
-      }
-      if (err.response?.status === 401) {
-        Alert.alert('Session Expired', 'Please log out and log back in');
-      } else if (err.response?.status === 404) {
-        if (errData?.debug) {
-          Alert.alert('Store Mismatch', `Product exists but belongs to a different store.\nProduct store: ${errData.debug.productStoreId}\nYour store: ${errData.debug.userStoreId}`);
-        } else {
-          Alert.alert('Not Found', 'Product not found. Ask staff to add it first.');
-        }
+      const status = err.response?.status;
+      const message = err.response?.data?.message;
+      setShowScanner(false);
+      if (!err.response) {
+        Alert.alert('Connection Error', 'Cannot reach server. Make sure the backend is running.');
+      } else if (status === 401) {
+        Alert.alert('Session Expired', 'Please log out and log back in.');
+      } else if (status === 404) {
+        Alert.alert('Not Found', message || 'Product not found. Ask staff to add it first.');
       } else {
-        Alert.alert('Error', `Failed: ${errData?.message || err.message}`);
+        Alert.alert('Error', message || 'Something went wrong. Try again.');
       }
     }
   };
