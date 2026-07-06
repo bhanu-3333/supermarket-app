@@ -19,43 +19,113 @@ router.get('/barcode/:barcode', protect, async (req, res) => {
       storeId: req.user.storeId 
     });
 
-    // Fallback: if customer's storeId doesn't match, try finding by storeCode
-    // This handles cases where storeId was saved differently
+    if (product) {
+      console.log('[BARCODE] Product found via primary lookup:', product.name);
+      return res.json({ success: true, data: product });
+    }
+
+    // Fallback 1: if customer's storeId doesn't match, try finding by storeCode
     if (!product && req.user.storeCode) {
+      console.log('[BARCODE] Primary lookup failed, trying fallback by storeCode:', req.user.storeCode);
+      
       const admin = await User.findOne({ 
         storeCode: req.user.storeCode, 
         role: 'admin' 
       });
-      if (admin && admin._id.toString() !== req.user.storeId?.toString()) {
-        console.log('[BARCODE] Trying fallback with admin storeId:', admin._id);
+      
+      if (admin) {
+        console.log('[BARCODE] Found admin with storeId:', admin._id);
         product = await Product.findOne({ 
           barcode,
           storeId: admin._id
         });
+        
         if (product) {
+          console.log('[BARCODE] Product found via storeCode fallback:', product.name);
           // Fix the user's storeId to match admin's _id going forward
-          console.log('[BARCODE] Found via fallback — fixing storeId mismatch for user:', req.user._id);
-          await User.updateOne({ _id: req.user._id }, { storeId: admin._id });
+          if (admin._id.toString() !== req.user.storeId?.toString()) {
+            console.log('[BARCODE] Fixing storeId mismatch for user:', req.user._id, 'from:', req.user.storeId, 'to:', admin._id);
+            await User.updateOne({ _id: req.user._id }, { storeId: admin._id });
+          }
+          return res.json({ success: true, data: product });
+        }
+      } else {
+        console.log('[BARCODE] No admin found with storeCode:', req.user.storeCode);
+      }
+    }
+
+    // Fallback 2: For customers, try to find product by storeName if available
+    if (!product && req.user.role === 'customer' && req.user.storeName) {
+      console.log('[BARCODE] Trying storeName fallback:', req.user.storeName);
+      
+      const admin = await User.findOne({ 
+        storeName: req.user.storeName, 
+        role: 'admin' 
+      });
+      
+      if (admin) {
+        console.log('[BARCODE] Found admin by storeName with storeId:', admin._id);
+        product = await Product.findOne({ 
+          barcode,
+          storeId: admin._id
+        });
+        
+        if (product) {
+          console.log('[BARCODE] Product found via storeName fallback:', product.name);
+          // Fix the user's storeId and storeCode
+          console.log('[BARCODE] Updating customer storeId and storeCode');
+          await User.updateOne({ _id: req.user._id }, { 
+            storeId: admin._id,
+            storeCode: admin.storeCode 
+          });
+          return res.json({ success: true, data: product });
         }
       }
     }
 
-    if (!product) {
-      const anyProduct = await Product.findOne({ barcode });
-      if (anyProduct) {
-        console.log('[BARCODE] Mismatch! Product storeId:', anyProduct.storeId, '| User storeId:', req.user.storeId);
-        return res.status(404).json({ 
-          success: false, 
-          message: 'Product not found in your store',
-          debug: { productStoreId: anyProduct.storeId, userStoreId: req.user.storeId }
-        });
+    // Fallback 3: Check if product exists with any storeId (for debugging)
+    const anyProduct = await Product.findOne({ barcode });
+    if (anyProduct) {
+      console.log('[BARCODE] MISMATCH DETECTED!');
+      console.log('[BARCODE] Product exists but storeId mismatch:');
+      console.log('[BARCODE] - Product storeId:', anyProduct.storeId);
+      console.log('[BARCODE] - User storeId:', req.user.storeId);
+      console.log('[BARCODE] - User storeCode:', req.user.storeCode);
+      console.log('[BARCODE] - User storeName:', req.user.storeName);
+      
+      // Try to find the correct admin for this product
+      const productAdmin = await User.findById(anyProduct.storeId);
+      if (productAdmin) {
+        console.log('[BARCODE] Product belongs to admin:', productAdmin.name, 'storeCode:', productAdmin.storeCode);
+        
+        // If customer belongs to this store, fix their storeId
+        if (req.user.role === 'customer' && 
+            (req.user.storeCode === productAdmin.storeCode || req.user.storeName === productAdmin.storeName)) {
+          console.log('[BARCODE] Customer belongs to this store, fixing storeId...');
+          await User.updateOne({ _id: req.user._id }, { 
+            storeId: productAdmin._id,
+            storeCode: productAdmin.storeCode,
+            storeName: productAdmin.storeName
+          });
+          return res.json({ success: true, data: anyProduct });
+        }
       }
-      console.log('[BARCODE] Product does not exist in DB at all');
-      return res.status(404).json({ success: false, message: 'Product not found' });
+      
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Product not found in your store',
+        debug: { 
+          productStoreId: anyProduct.storeId, 
+          userStoreId: req.user.storeId,
+          userStoreCode: req.user.storeCode,
+          suggestion: 'Contact admin - storeId mismatch detected'
+        }
+      });
     }
     
-    console.log('[BARCODE] Product found:', product.name);
-    res.json({ success: true, data: product });
+    console.log('[BARCODE] Product does not exist in database at all');
+    return res.status(404).json({ success: false, message: 'Product not found' });
+    
   } catch (err) {
     console.error('Barcode lookup error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
