@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
+const User = require('../models/User');
 const { protect, authorize } = require('../middleware/auth');
+const smsService = require('../utils/smsService');
 
 // @route   GET /api/orders/recent
 // @desc    Get recent orders
@@ -109,13 +111,24 @@ router.post('/', protect, async (req, res) => {
       return res.status(400).json({ success: false, message: 'No order items' });
     }
 
-    // Deduct stock for each ordered product
+    // Deduct stock for each ordered product and collect product details for SMS
     const Product = require('../models/Product');
+    const orderItemsWithDetails = [];
+    
     for (const item of orderItems) {
-      await Product.findByIdAndUpdate(
+      const product = await Product.findByIdAndUpdate(
         item.product,
-        { $inc: { stockQuantity: -item.quantity } }
+        { $inc: { stockQuantity: -item.quantity } },
+        { new: false } // Get product details before stock deduction
       );
+      
+      if (product) {
+        orderItemsWithDetails.push({
+          name: product.name,
+          quantity: item.quantity,
+          price: product.price
+        });
+      }
     }
     
     const order = await Order.create({
@@ -129,6 +142,26 @@ router.post('/', protect, async (req, res) => {
       isPaid: paymentMethod !== 'Razorpay',
       paidAt: paymentMethod !== 'Razorpay' ? Date.now() : undefined,
     });
+
+    // Send SMS notification to customer
+    try {
+      if (req.user.phone && req.user.role === 'customer') {
+        // Get store name from store admin
+        const storeAdmin = await User.findById(req.user.storeId);
+        const storeName = storeAdmin ? storeAdmin.storeName : 'SmartCart Store';
+        
+        await smsService.sendOrderNotification(req.user.phone, {
+          customerName: req.user.name,
+          orderId: order._id.toString().slice(-6).toUpperCase(),
+          totalPrice: totalPrice.toFixed(2),
+          storeName: storeName,
+          orderItems: orderItemsWithDetails
+        });
+      }
+    } catch (smsError) {
+      console.error('Failed to send order SMS:', smsError);
+      // Don't fail order creation if SMS fails
+    }
     
     res.status(201).json({ success: true, data: order });
   } catch (err) {
