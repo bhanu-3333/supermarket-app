@@ -24,18 +24,24 @@ export default function RegisterCustomerScreen() {
   const toast = useToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [storeCode, setStoreCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!name || !email || !password || !storeCode) {
+    if (!name || !email || !phone || !password || !storeCode) {
       toast.error('Missing Fields', 'Please fill in all fields');
       return;
     }
 
     if (!email.includes('@')) {
       toast.error('Invalid Email', 'Please enter a valid email address');
+      return;
+    }
+
+    if (!/^[0-9]{10}$/.test(phone)) {
+      toast.error('Invalid Phone', 'Please enter a valid 10-digit phone number');
       return;
     }
 
@@ -50,6 +56,7 @@ export default function RegisterCustomerScreen() {
       const { data } = await api.post('/auth/register-customer', {
         name,
         email,
+        phone,
         password,
         storeCode,
       });
@@ -128,6 +135,17 @@ export default function RegisterCustomerScreen() {
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
+          />
+
+          <Text style={styles.label}>Phone Number :</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="eg : 9876543210"
+            placeholderTextColor="#999"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="numeric"
+            maxLength={10}
           />
 
           <Text style={styles.label}>Password :</Text>
