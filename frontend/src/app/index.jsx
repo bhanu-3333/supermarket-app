@@ -1,25 +1,58 @@
 import { View, Text, StyleSheet, Image } from 'react-native';
-import { useRouter, Redirect } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAuth } from '../context/AuthContext';
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import SwipeButton from '../components/SwipeButton';
 import { wp, hp, moderateScale, isTablet } from '../utils/responsive';
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const [hasRedirected, setHasRedirected] = useState(false);
 
-  // Only redirect if user exists AND we're not in the middle of a logout
-  if (!loading && user) {
-    if (user.role === 'admin') return <Redirect href="/(admin)" />;
-    if (user.role === 'staff') return <Redirect href="/(staff)" />;
-    return <Redirect href="/(customer)" />;
+  // Reset redirect flag when screen comes into focus (like after logout)
+  useFocusEffect(
+    useCallback(() => {
+      console.log('WelcomeScreen: Screen focused, user=', user ? `${user.name} (${user.role})` : 'null');
+      if (!user) {
+        setHasRedirected(false);
+      }
+    }, [user])
+  );
+
+  useEffect(() => {
+    console.log('WelcomeScreen: loading=', loading, 'user=', user ? `${user.name} (${user.role})` : 'null', 'hasRedirected=', hasRedirected);
+    
+    if (!loading) {
+      if (user && !hasRedirected) {
+        console.log('Redirecting authenticated user to role screen...');
+        setHasRedirected(true);
+        if (user.role === 'admin') router.replace('/(admin)');
+        else if (user.role === 'staff') router.replace('/(staff)');
+        else router.replace('/(customer)');
+      } else if (!user) {
+        // Reset redirect flag when user is logged out
+        console.log('User logged out, resetting redirect flag...');
+        setHasRedirected(false);
+      }
+    }
+  }, [user, loading, hasRedirected, router]);
+
+  // Show loading while checking auth
+  if (loading) {
+    console.log('WelcomeScreen: Showing loading state');
+    return null;
   }
 
-  // Show nothing while checking auth
-  if (loading) return null;
+  // Show nothing while redirecting authenticated user
+  if (user && !hasRedirected) {
+    console.log('WelcomeScreen: Redirecting authenticated user...');
+    return null;
+  }
 
+  // Show Welcome screen for unauthenticated users or after logout
+  console.log('WelcomeScreen: Rendering Welcome screen');
   return (
     <GestureHandlerRootView style={styles.container}>
       {/* Diagonal blue background shape */}
