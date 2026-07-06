@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Automatically detect the correct API URL based on environment
 const getApiUrl = () => {
@@ -36,12 +37,21 @@ const api = axios.create({
   },
 });
 
-// Request interceptor for debugging
+// Request interceptor — auto-attach token from storage
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`);
-    if (config.headers.Authorization) {
-      console.log('[API] Authorization header present');
+    // Only attach token if not already set
+    if (!config.headers.Authorization) {
+      try {
+        const stored = await AsyncStorage.getItem('smartcart_user');
+        if (stored) {
+          const userData = JSON.parse(stored);
+          if (userData?.token) {
+            config.headers.Authorization = `Bearer ${userData.token}`;
+          }
+        }
+      } catch (_) {}
     }
     return config;
   },
