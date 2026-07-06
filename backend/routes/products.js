@@ -192,6 +192,60 @@ router.get('/debug/:barcode', protect, async (req, res) => {
     res.status(500).json({ success: false, message: 'Debug error' });
   }
 });
+
+// @route   POST /api/products/fix-store-ids
+// @desc    Fix storeId mismatches for customers (utility endpoint)
+// @access  Private (Admin only)
+router.post('/fix-store-ids', protect, authorize('admin'), async (req, res) => {
+  try {
+    console.log('[FIX] Starting storeId fix process...');
+    
+    // Find all customers with this admin's storeCode but different storeId
+    const customersToFix = await User.find({
+      role: 'customer',
+      storeCode: req.user.storeCode,
+      $or: [
+        { storeId: { $ne: req.user._id } },
+        { storeId: { $exists: false } }
+      ]
+    });
+    
+    console.log('[FIX] Found', customersToFix.length, 'customers to fix');
+    
+    const fixes = [];
+    for (const customer of customersToFix) {
+      const oldStoreId = customer.storeId;
+      await User.updateOne(
+        { _id: customer._id },
+        { 
+          storeId: req.user._id,
+          storeCode: req.user.storeCode,
+          storeName: req.user.storeName
+        }
+      );
+      
+      fixes.push({
+        customerId: customer._id,
+        customerName: customer.name,
+        customerEmail: customer.email,
+        oldStoreId: oldStoreId,
+        newStoreId: req.user._id
+      });
+    }
+    
+    console.log('[FIX] Fixed', fixes.length, 'customer storeIds');
+    
+    res.json({
+      success: true,
+      message: `Fixed storeId for ${fixes.length} customers`,
+      fixes: fixes
+    });
+    
+  } catch (err) {
+    console.error('[FIX] Error fixing storeIds:', err);
+    res.status(500).json({ success: false, message: 'Error fixing storeIds' });
+  }
+});
 router.get('/', protect, authorize('staff', 'admin'), async (req, res) => {
   try {
     const products = await Product.find({ storeId: req.user.storeId }).sort({ createdAt: -1 });
