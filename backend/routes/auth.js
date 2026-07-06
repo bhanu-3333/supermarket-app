@@ -96,6 +96,7 @@ router.post('/login', async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         role: user.role,
         storeCode: user.storeCode,
         storeName: user.storeName,
@@ -105,6 +106,22 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Login error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// @route   POST /api/auth/verify-store
+// @desc    Verify a store code is valid and return store name
+// @access  Public
+router.post('/verify-store', async (req, res) => {
+  try {
+    const { storeCode } = req.body;
+    const store = await User.findOne({ storeCode: storeCode?.toUpperCase(), role: 'admin' });
+    if (!store) {
+      return res.status(404).json({ success: false, message: 'Invalid store code' });
+    }
+    res.json({ success: true, storeName: store.storeName });
+  } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
@@ -182,6 +199,7 @@ router.get('/validate', protect, async (req, res) => {
         _id: req.user._id,
         name: req.user.name,
         email: req.user.email,
+        phone: req.user.phone,
         role: req.user.role,
         storeName: req.user.storeName,
         storeCode: req.user.storeCode,
