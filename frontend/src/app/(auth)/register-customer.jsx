@@ -27,7 +27,18 @@ export default function RegisterCustomerScreen() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [storeCode, setStoreCode] = useState('');
+  const [storeVerified, setStoreVerified] = useState(null); // { name } or 'invalid'
   const [isLoading, setIsLoading] = useState(false);
+
+  const verifyStoreCode = async (code) => {
+    if (code.length < 5) { setStoreVerified(null); return; }
+    try {
+      const { data } = await api.post('/auth/verify-store', { storeCode: code });
+      setStoreVerified(data.success ? { name: data.storeName } : 'invalid');
+    } catch {
+      setStoreVerified('invalid');
+    }
+  };
 
   const handleRegister = async () => {
     if (!name || !email || !phone || !password || !storeCode) {
@@ -164,9 +175,23 @@ export default function RegisterCustomerScreen() {
             placeholder="eg : FRE4821"
             placeholderTextColor="#999"
             value={storeCode}
-            onChangeText={(text) => setStoreCode(text.toUpperCase())}
+            onChangeText={(text) => {
+              const code = text.toUpperCase();
+              setStoreCode(code);
+              verifyStoreCode(code);
+            }}
             autoCapitalize="characters"
           />
+          {storeVerified === 'invalid' && (
+            <Text style={{ color: 'red', marginTop: -14, marginBottom: 10, marginLeft: 8, fontSize: 12 }}>
+              Invalid store code
+            </Text>
+          )}
+          {storeVerified && storeVerified !== 'invalid' && (
+            <Text style={{ color: '#10b981', marginTop: -14, marginBottom: 10, marginLeft: 8, fontSize: 12 }}>
+              ✓ {storeVerified.name}
+            </Text>
+          )}
 
           <TouchableOpacity
             style={styles.signUpButton}
