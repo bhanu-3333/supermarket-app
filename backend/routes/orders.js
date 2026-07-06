@@ -145,22 +145,26 @@ router.post('/', protect, async (req, res) => {
 
     // Send SMS notification to customer
     try {
-      if (req.user.phone && req.user.role === 'customer') {
-        // Get store name from store admin
-        const storeAdmin = await User.findById(req.user.storeId);
-        const storeName = storeAdmin ? storeAdmin.storeName : 'SmartCart Store';
-        
-        await smsService.sendOrderNotification(req.user.phone, {
-          customerName: req.user.name,
-          orderId: order._id.toString().slice(-6).toUpperCase(),
-          totalPrice: totalPrice.toFixed(2),
-          storeName: storeName,
-          orderItems: orderItemsWithDetails
-        });
+      if (req.user.role === 'customer') {
+        if (req.user.phone) {
+          const storeAdmin = await User.findById(req.user.storeId);
+          const storeName = storeAdmin ? storeAdmin.storeName : 'SmartCart Store';
+
+          console.log(`[ORDER] Sending SMS to ${req.user.phone} for order ${order._id}`);
+          const smsResult = await smsService.sendOrderNotification(req.user.phone, {
+            customerName: req.user.name,
+            orderId: order._id.toString().slice(-6).toUpperCase(),
+            totalPrice: totalPrice.toFixed(2),
+            storeName,
+            orderItems: orderItemsWithDetails,
+          });
+          console.log('[ORDER] SMS result:', smsResult);
+        } else {
+          console.log(`[ORDER] Customer ${req.user.email} has no phone number — SMS skipped`);
+        }
       }
     } catch (smsError) {
-      console.error('Failed to send order SMS:', smsError);
-      // Don't fail order creation if SMS fails
+      console.error('[ORDER] Failed to send SMS:', smsError);
     }
     
     res.status(201).json({ success: true, data: order });
