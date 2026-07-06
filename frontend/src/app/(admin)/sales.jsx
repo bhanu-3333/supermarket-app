@@ -170,7 +170,9 @@ export default function AdminSales() {
             onPress={() => setShowDatePicker(true)}
           >
             <Ionicons name="calendar-outline" size={20} color="#666" />
-            <Text style={styles.dateSelectorText}>Select date</Text>
+            <Text style={styles.dateSelectorText}>
+              {selectedDate ? selectedDate.toLocaleDateString('en-GB') : 'Select date'}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
