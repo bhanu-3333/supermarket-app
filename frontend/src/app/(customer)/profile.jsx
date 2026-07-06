@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,46 +6,41 @@ import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
 import { useState } from 'react';
 import LogoutModal from '../../components/LogoutModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CommonActions } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
+import api from '../../utils/api';
 
 export default function CustomerProfile() {
   const router = useRouter();
-  const navigation = useNavigation();
-  const { user, logout } = useAuth();
+  const { user, logout, login } = useAuth();
   const insets = useSafeAreaInsets();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [editingPhone, setEditingPhone] = useState(false);
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [savingPhone, setSavingPhone] = useState(false);
+
+  const handleSavePhone = async () => {
+    if (!/^[0-9]{10}$/.test(phone)) {
+      Alert.alert('Invalid Phone', 'Please enter a valid 10-digit phone number');
+      return;
+    }
+    setSavingPhone(true);
+    try {
+      const { data } = await api.patch('/customer/update-phone', { phone });
+      if (data.success) {
+        await login({ ...user, phone });
+        setEditingPhone(false);
+        Alert.alert('Saved', 'Phone number updated successfully');
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to update phone number');
+    } finally {
+      setSavingPhone(false);
+    }
+  };
 
   const handleLogout = async () => {
     setShowLogoutModal(false);
-    
-    try {
-      // Clear authentication state first
-      await logout();
-      console.log('Logout completed, resetting navigation stack...');
-      
-      // Reset navigation stack completely - this removes ALL screens from history
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            {
-              name: 'index', // This should be the Get Started screen
-            },
-          ],
-        })
-      );
-      
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Force navigation reset even if logout fails
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'index' }],
-        })
-      );
-    }
+    await logout();
+    // AuthGuard in _layout.jsx will automatically redirect to Get Started
   };
 
   const menuItems = [
@@ -105,6 +100,36 @@ export default function CustomerProfile() {
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{user?.name || 'Customer'}</Text>
             <Text style={styles.profileEmail}>{user?.email || 'customer@email.com'}</Text>
+            {/* Phone number row */}
+            {editingPhone ? (
+              <View style={styles.phoneEditRow}>
+                <TextInput
+                  style={styles.phoneInput}
+                  value={phone}
+                  onChangeText={setPhone}
+                  keyboardType="numeric"
+                  maxLength={10}
+                  placeholder="10-digit phone"
+                  placeholderTextColor="#aaa"
+                />
+                <TouchableOpacity onPress={handleSavePhone} disabled={savingPhone} style={styles.saveBtn}>
+                  {savingPhone
+                    ? <ActivityIndicator size="small" color="#fff" />
+                    : <Text style={styles.saveBtnText}>Save</Text>}
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setEditingPhone(false)} style={styles.cancelBtn}>
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity style={styles.phoneRow} onPress={() => setEditingPhone(true)}>
+                <Ionicons name="call-outline" size={14} color="#666" />
+                <Text style={styles.profilePhone}>
+                  {user?.phone ? user.phone : 'Add phone number'}
+                </Text>
+                <Ionicons name="pencil-outline" size={13} color="#123F7A" style={{ marginLeft: 4 }} />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -216,6 +241,52 @@ const styles = StyleSheet.create({
   profileEmail: {
     fontSize: moderateScale(14),
     color: '#666',
+  },
+  phoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp(0.5),
+    gap: 4,
+  },
+  profilePhone: {
+    fontSize: moderateScale(13),
+    color: '#666',
+    marginLeft: 2,
+  },
+  phoneEditRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: hp(0.8),
+    gap: wp(2),
+  },
+  phoneInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: moderateScale(8),
+    paddingHorizontal: wp(2.5),
+    paddingVertical: hp(0.7),
+    fontSize: moderateScale(13),
+    color: '#111',
+    backgroundColor: '#f9f9f9',
+  },
+  saveBtn: {
+    backgroundColor: '#123F7A',
+    borderRadius: moderateScale(8),
+    paddingHorizontal: wp(3),
+    paddingVertical: hp(0.8),
+  },
+  saveBtnText: {
+    color: '#fff',
+    fontSize: moderateScale(12),
+    fontWeight: '600',
+  },
+  cancelBtn: {
+    paddingHorizontal: wp(2),
+  },
+  cancelBtnText: {
+    color: '#888',
+    fontSize: moderateScale(12),
   },
   menuContainer: {
     // no flex:1 — let it size naturally so logout button flows below
