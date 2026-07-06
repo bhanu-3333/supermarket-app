@@ -132,9 +132,66 @@ router.get('/barcode/:barcode', protect, async (req, res) => {
   }
 });
 
-// @route   GET /api/products
-// @desc    Get all products
-// @access  Private (Staff/Admin)
+// @route   GET /api/products/debug/:barcode
+// @desc    Debug barcode lookup (shows all products with this barcode)
+// @access  Private (All authenticated users)
+router.get('/debug/:barcode', protect, async (req, res) => {
+  try {
+    const barcode = req.params.barcode.trim();
+    
+    // Find all products with this barcode regardless of store
+    const allProducts = await Product.find({ barcode });
+    
+    // Get user info
+    const userInfo = {
+      userId: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      storeId: req.user.storeId,
+      storeCode: req.user.storeCode,
+      storeName: req.user.storeName
+    };
+    
+    // Get store admin info if available
+    let adminInfo = null;
+    if (req.user.storeCode) {
+      const admin = await User.findOne({ storeCode: req.user.storeCode, role: 'admin' });
+      if (admin) {
+        adminInfo = {
+          adminId: admin._id,
+          name: admin.name,
+          storeCode: admin.storeCode,
+          storeName: admin.storeName
+        };
+      }
+    }
+    
+    // Get all store admins for reference
+    const allAdmins = await User.find({ role: 'admin' }, 'name storeCode storeName _id');
+    
+    res.json({
+      success: true,
+      debug: {
+        barcode,
+        userInfo,
+        adminInfo,
+        productsWithBarcode: allProducts.map(p => ({
+          productId: p._id,
+          name: p.name,
+          storeId: p.storeId,
+          createdBy: p.createdBy,
+          price: p.price,
+          stock: p.stockQuantity
+        })),
+        allStoreAdmins: allAdmins
+      }
+    });
+  } catch (err) {
+    console.error('Debug endpoint error:', err);
+    res.status(500).json({ success: false, message: 'Debug error' });
+  }
+});
 router.get('/', protect, authorize('staff', 'admin'), async (req, res) => {
   try {
     const products = await Product.find({ storeId: req.user.storeId }).sort({ createdAt: -1 });
