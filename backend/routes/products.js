@@ -331,7 +331,10 @@ router.post('/', protect, authorize('staff', 'admin'), async (req, res) => {
     console.log('[PRODUCT] Created barcode:', product.barcode, '| length:', product.barcode.length, '| storeId:', product.storeId);
     res.status(201).json({ success: true, data: product });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('[PRODUCT] Error creating product:', err);
+    console.error('[PRODUCT] Error details:', err.message);
+    console.error('[PRODUCT] Stack trace:', err.stack);
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 });
 
