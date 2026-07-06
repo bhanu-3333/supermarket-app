@@ -13,10 +13,24 @@ export default function AdminMore() {
   const insets = useSafeAreaInsets();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setShowLogoutModal(false);
-    router.replace('/');
-    logout();
+    
+    try {
+      await logout();
+      console.log('Logout completed, navigating to home...');
+      
+      // Try multiple navigation approaches
+      if (router.canGoBack()) {
+        router.dismissAll();
+      }
+      router.replace('/');
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force navigation even if logout fails
+      router.replace('/');
+    }
   };
 
   const MenuItem = ({ iconImage, title, onPress, color = '#111' }) => (
