@@ -9,7 +9,7 @@ const ProductSchema = new mongoose.Schema({
   barcode: {
     type: String,
     required: [true, 'Please add a barcode'],
-    unique: true,
+    // Removed global unique constraint - will use compound index instead
   },
   category: {
     type: String,
@@ -68,5 +68,9 @@ const ProductSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Create compound unique index for barcode + storeId
+// This ensures barcodes are unique per store, not globally
+ProductSchema.index({ barcode: 1, storeId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Product', ProductSchema);
