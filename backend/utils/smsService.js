@@ -2,51 +2,21 @@ const axios = require('axios');
 
 class SMSService {
   constructor() {
-    // Using Fast2SMS - you can replace with any SMS provider
-    this.apiKey = process.env.SMS_API_KEY || 'demo-key';
+    this.apiKey = process.env.SMS_API_KEY;
     this.baseUrl = 'https://www.fast2sms.com/dev/bulkV2';
   }
 
   async sendOrderNotification(phone, orderDetails) {
     try {
-      // Create product list string
-      let productListText = '';
-      if (orderDetails.orderItems && orderDetails.orderItems.length > 0) {
-        productListText = orderDetails.orderItems.map(item => 
-          `${item.name} x${item.quantity} - ₹${(item.price * item.quantity).toFixed(2)}`
-        ).join(', ');
-      }
+      const productListText = (orderDetails.orderItems || [])
+        .map(item => `${item.name} x${item.quantity} - Rs.${(item.price * item.quantity).toFixed(2)}`)
+        .join(', ');
 
-      const message = `Hi ${orderDetails.customerName}! Order #${orderDetails.orderId} placed successfully at ${orderDetails.storeName}.\n\nItems: ${productListText}\n\nTotal: ₹${orderDetails.totalPrice}\n\nThank you for shopping with SmartCart!`;
-      
-      // If using a demo key, just log the message
-      if (this.apiKey === 'demo-key') {
-        console.log('SMS Service (Demo Mode):', {
-          phone,
-          message,
-          orderDetails
-        });
-        return { success: true, message: 'SMS sent (demo mode)' };
-      }
+      const message = `Hi ${orderDetails.customerName}! Order #${orderDetails.orderId} placed at ${orderDetails.storeName}. Items: ${productListText}. Total: Rs.${orderDetails.totalPrice}. Thank you for shopping with SmartCart!`;
 
-      const response = await axios.post(this.baseUrl, {
-        authorization: this.apiKey,
-        sender_id: 'FSTSMS',
-        message: message,
-        language: 'english',
-        route: 'p',
-        numbers: phone,
-      });
-
-      if (response.data.return) {
-        console.log('SMS sent successfully:', response.data);
-        return { success: true, data: response.data };
-      } else {
-        console.error('SMS sending failed:', response.data);
-        return { success: false, error: response.data };
-      }
+      return await this._send(phone, message, 'Order notification');
     } catch (error) {
-      console.error('SMS Service Error:', error.message);
+      console.error('[SMS] sendOrderNotification error:', error.message);
       return { success: false, error: error.message };
     }
   }
@@ -54,35 +24,52 @@ class SMSService {
   async sendWelcomeMessage(phone, customerName, storeName) {
     try {
       const message = `Welcome to ${storeName}, ${customerName}! You have successfully registered with SmartCart. Start shopping and enjoy seamless checkout!`;
-      
-      // If using a demo key, just log the message
-      if (this.apiKey === 'demo-key') {
-        console.log('SMS Service (Demo Mode):', {
-          phone,
-          message
-        });
-        return { success: true, message: 'Welcome SMS sent (demo mode)' };
-      }
+      return await this._send(phone, message, 'Welcome message');
+    } catch (error) {
+      console.error('[SMS] sendWelcomeMessage error:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
 
-      const response = await axios.post(this.baseUrl, {
-        authorization: this.apiKey,
-        sender_id: 'FSTSMS',
-        message: message,
-        language: 'english',
-        route: 'p',
-        numbers: phone,
-      });
+  async _send(phone, message, label) {
+    if (!this.apiKey) {
+      console.log(`[SMS] No API key set — skipping ${label} to ${phone}`);
+      console.log(`[SMS] Message: ${message}`);
+      return { success: false, error: 'SMS_API_KEY not configured' };
+    }
 
-      if (response.data.return) {
-        console.log('Welcome SMS sent successfully:', response.data);
+    console.log(`[SMS] Sending ${label} to ${phone}...`);
+    console.log(`[SMS] Message: ${message}`);
+
+    try {
+      // Fast2SMS bulkV2 — authorization goes in the HEADER, not the body
+      const response = await axios.post(
+        this.baseUrl,
+        {
+          sender_id: 'FSTSMS',
+          message,
+          language: 'english',
+          route: 'p',
+          numbers: phone,
+        },
+        {
+          headers: {
+            authorization: this.apiKey,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.data.return === true) {
+        console.log(`[SMS] ${label} sent successfully to ${phone}`);
         return { success: true, data: response.data };
       } else {
-        console.error('Welcome SMS sending failed:', response.data);
+        console.error(`[SMS] ${label} failed:`, response.data);
         return { success: false, error: response.data };
       }
-    } catch (error) {
-      console.error('SMS Service Error:', error.message);
-      return { success: false, error: error.message };
+    } catch (err) {
+      console.error(`[SMS] HTTP error for ${label}:`, err.response?.data || err.message);
+      return { success: false, error: err.response?.data || err.message };
     }
   }
 }
