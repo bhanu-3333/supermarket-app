@@ -27,20 +27,37 @@ export function AuthProvider({ children }) {
     }
   };
 
-
   const login = async (userData) => {
     await AsyncStorage.setItem('smartcart_user', JSON.stringify(userData));
     setUser(userData);
   };
 
-  const logout = () => {
-    // Synchronous state clear — UI updates instantly
+  const logout = async () => {
+    console.log('AuthContext: Starting logout process...');
+    
+    // Clear state immediately for instant UI update
     setUser(null);
-    // Clear storage in background — don't block navigation
-    AsyncStorage.multiRemove(['smartcart_user', 'token', 'user', 'role', 'storeId', 'cart']);
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      window.localStorage.clear();
-      window.sessionStorage.clear();
+    console.log('AuthContext: User state cleared');
+    
+    // Clear all storage
+    try {
+      await AsyncStorage.multiRemove([
+        'smartcart_user', 
+        'token', 
+        'user', 
+        'role', 
+        'storeId', 
+        'cart'
+      ]);
+      
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        window.localStorage.clear();
+        window.sessionStorage.clear();
+      }
+      
+      console.log('AuthContext: Storage cleared successfully');
+    } catch (error) {
+      console.error('Error clearing storage during logout:', error);
     }
   };
 
