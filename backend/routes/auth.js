@@ -4,6 +4,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const QRCode = require('qrcode');
 const { protect } = require('../middleware/auth');
+const smsService = require('../utils/smsService');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -113,11 +114,16 @@ router.post('/login', async (req, res) => {
 // @access  Public
 router.post('/register-customer', async (req, res) => {
   try {
-    const { name, email, password, storeCode } = req.body;
+    const { name, email, phone, password, storeCode } = req.body;
 
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ success: false, message: 'User already exists' });
+    }
+
+    // Validate phone number
+    if (!/^[0-9]{10}$/.test(phone)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid 10-digit phone number' });
     }
 
     // Find the store by store code
@@ -129,6 +135,7 @@ router.post('/register-customer', async (req, res) => {
     user = await User.create({
       name,
       email,
+      phone,
       password,
       role: 'customer',
       storeId: store._id,
@@ -136,12 +143,21 @@ router.post('/register-customer', async (req, res) => {
       storeCode: store.storeCode,
     });
 
+    // Send welcome SMS
+    try {
+      await smsService.sendWelcomeMessage(phone, name, store.storeName);
+    } catch (smsError) {
+      console.error('Failed to send welcome SMS:', smsError);
+      // Don't fail registration if SMS fails
+    }
+
     res.status(201).json({
       success: true,
       data: {
         _id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         role: user.role,
         storeName: user.storeName,
         storeCode: user.storeCode,
