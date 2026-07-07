@@ -22,7 +22,14 @@ app.use((req, res, next) => {
 
 // Enable CORS for all origins (necessary for Expo Go and mobile development)
 app.use(cors({
-  origin: '*', // Allow all origins
+  origin: [
+    '*', // Allow all origins for development
+    'http://localhost:3000',
+    'http://localhost:19006', // Expo web
+    `http://10.89.154.219:19006`, // Your IP for Expo web
+    'exp://*', // Expo Go
+    'http://10.89.154.*' // Your network range
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
