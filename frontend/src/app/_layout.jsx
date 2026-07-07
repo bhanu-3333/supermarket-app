@@ -3,7 +3,19 @@ import { AuthProvider, useAuth } from '../context/AuthContext';
 import { ToastProvider } from '../context/ToastContext';
 import { useEffect } from 'react';
 
-// This component watches auth state and enforces routing rules
+// Registers the router into AuthContext so logout() can navigate directly
+function RouterRegistrar() {
+  const { setRouter } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    setRouter(router);
+  }, []);
+
+  return null;
+}
+
+// Backup guard — catches any case where user becomes null on a protected screen
 function AuthGuard() {
   const { user, loading } = useAuth();
   const segments = useSegments();
@@ -12,14 +24,13 @@ function AuthGuard() {
   useEffect(() => {
     if (loading) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
-    const inAdminGroup = segments[0] === '(admin)';
-    const inStaffGroup = segments[0] === '(staff)';
-    const inCustomerGroup = segments[0] === '(customer)';
-    const inProtectedRoute = inAdminGroup || inStaffGroup || inCustomerGroup;
+    const inProtectedRoute =
+      segments[0] === '(admin)' ||
+      segments[0] === '(staff)' ||
+      segments[0] === '(customer)';
 
     if (!user && inProtectedRoute) {
-      // Not authenticated but trying to access a protected route — go to Get Started
+      console.log('[AuthGuard] No user on protected route — redirecting to /');
       router.replace('/');
     }
   }, [user, loading, segments]);
@@ -31,6 +42,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <ToastProvider>
+        <RouterRegistrar />
         <AuthGuard />
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
