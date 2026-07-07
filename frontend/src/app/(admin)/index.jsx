@@ -118,10 +118,7 @@ export default function AdminDashboard() {
           orders.map((order) => (
             <View key={order._id} style={styles.orderCard}>
               <View style={styles.orderLeft}>
-                <Text style={styles.orderIdLabel}>OrderID:</Text>
-                <Text style={styles.orderId} numberOfLines={1}>
-                  {order._id}
-                </Text>
+                <Text style={styles.customerName}>{order.user?.name || 'Customer'}</Text>
                 <Text style={styles.orderDate}>
                   {new Date(order.createdAt).toLocaleDateString()} {new Date(order.createdAt).toLocaleTimeString()}
                 </Text>
@@ -258,6 +255,12 @@ const styles = StyleSheet.create({
   orderLeft: {
     flex: 1,
     marginRight: wp(2),
+  },
+  customerName: {
+    fontSize: moderateScale(15),
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: hp(0.8),
   },
   orderIdLabel: {
     fontSize: moderateScale(10),
