@@ -39,15 +39,15 @@ export default function LoginScreen() {
         console.log('[LOGIN] User role:', data.data.role);
         console.log('[LOGIN] Saving user data...');
         
-        // Show success toast
         toast.success('Login Successful', 'Welcome back!');
-        
         await login(data.data);
-        console.log('[LOGIN] Redirecting to home...');
-        
-        // Navigate after short delay to show toast
+
+        // Navigate directly to role dashboard — removes login from stack history
         setTimeout(() => {
-          router.replace('/');
+          const role = data.data.role;
+          if (role === 'admin') router.replace('/(admin)');
+          else if (role === 'staff') router.replace('/(staff)');
+          else router.replace('/(customer)');
         }, 1500);
       } else {
         console.log('[LOGIN] Login failed:', data.message);
