@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import api from '../../utils/api';
-import { wp, hp, moderateScale, isTablet } from '../../utils/responsive';
+import { wp, hp, moderateScale, isSmallDevice, isTablet } from '../../utils/responsive';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -140,10 +140,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    width: wp(70),
-    height: wp(70),
-    marginTop: -(wp(70) / 2),
-    marginLeft: -(wp(70) / 2),
+    width: wp(isSmallDevice ? 110 : 120),
+    height: wp(isSmallDevice ? 110 : 120),
+    marginTop: -(wp(isSmallDevice ? 110 : 120) / 2),
+    marginLeft: -(wp(isSmallDevice ? 110 : 120) / 2),
     opacity: 0.15,
     zIndex: 1,
   },
