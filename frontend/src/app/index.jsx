@@ -1,10 +1,18 @@
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAuth } from '../context/AuthContext';
 import { useEffect } from 'react';
 import SwipeButton from '../components/SwipeButton';
-import { wp, hp, moderateScale, isTablet } from '../utils/responsive';
+import { moderateScale } from '../utils/responsive';
+
+const { width, height } = Dimensions.get('window');
+
+// Layout constants
+const TOP_HEIGHT = height * 0.33;      // light section height
+const BOTTOM_HEIGHT = height * 0.67;   // blue section height
+const TROLLEY_SIZE = width * 0.88;
+const TROLLEY_TOP = height * 0.25;     // trolley starts here (overlaps the split)
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -12,71 +20,126 @@ export default function WelcomeScreen() {
 
   useEffect(() => {
     if (!loading && user) {
-      // Authenticated — send to role dashboard via replace (no back history)
       if (user.role === 'admin') router.replace('/(admin)');
       else if (user.role === 'staff') router.replace('/(staff)');
       else router.replace('/(customer)');
     }
   }, [user, loading]);
 
-  // Show nothing while loading or while redirecting an authenticated user
   if (loading || user) return null;
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <View style={styles.backgroundShape} />
-      <View style={styles.content}>
+    <GestureHandlerRootView style={styles.root}>
+      {/* ── Light blue top ── */}
+      <View style={styles.topBg} />
+
+      {/* ── Dark blue bottom with diagonal top edge ── */}
+      <View style={styles.bottomBg} />
+
+      {/* ── Text content (sits in the light section) ── */}
+      <View style={styles.textBlock}>
         <Text style={styles.brand}>SmartCart</Text>
         <Text style={styles.subtitle}>Scan. Shop. Skip the Line.</Text>
         <Text style={styles.description}>
           Lets you scan items, track your total, and enjoy{'\n'}fast, checkout-free shopping.
         </Text>
-        <View style={styles.imageContainer}>
-          <Image
-            source={require('../../assets/images/trolly.png')}
-            style={styles.trolley}
-            resizeMode="contain"
-          />
-        </View>
-        <View style={styles.swipeWrap}>
-          <SwipeButton onSwipeSuccess={() => router.push('/(auth)/login')} />
-        </View>
+      </View>
+
+      {/* ── Trolley (overlaps the divider) ── */}
+      <Image
+        source={require('../../assets/images/trolly.png')}
+        style={styles.trolley}
+        resizeMode="contain"
+      />
+
+      {/* ── Swipe button ── */}
+      <View style={styles.swipeWrap}>
+        <SwipeButton onSwipeSuccess={() => router.push('/(auth)/login')} label="Swipe now" />
       </View>
     </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#E8EFF6' },
-  backgroundShape: {
+  root: {
+    flex: 1,
+    backgroundColor: '#C8DFF0',
+  },
+
+  // Light blue top panel
+  topBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: TOP_HEIGHT + 60,          // extra so diagonal doesn't show gap
+    backgroundColor: '#C8DFF0',
+  },
+
+  // Darker blue bottom — uses a large border-radius on top to fake the diagonal curve
+  bottomBg: {
     position: 'absolute',
     bottom: 0,
-    width: wp(100),
-    height: hp(55),
-    backgroundColor: '#5A92D4',
-    top: hp(48),
-    transform: [{ skewY: '-15deg' }],
+    left: -width * 0.15,
+    right: -width * 0.15,
+    top: TOP_HEIGHT - 20,
+    backgroundColor: '#3D7CC9',
+    borderTopLeftRadius: width,
+    borderTopRightRadius: width,
   },
-  content: {
-    flex: 1,
+
+  // Text sits at the top
+  textBlock: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: TOP_HEIGHT,
     alignItems: 'center',
-    paddingTop: hp(8),
-    paddingHorizontal: wp(8),
-    maxWidth: isTablet ? 600 : '100%',
-    alignSelf: 'center',
-    width: '100%',
+    justifyContent: 'center',
+    paddingTop: height * 0.06,
+    paddingHorizontal: width * 0.1,
+    zIndex: 2,
   },
-  brand: { fontSize: moderateScale(36), fontWeight: 'bold', color: '#0A3B7C', marginBottom: hp(1.2) },
-  subtitle: { fontSize: moderateScale(20), fontWeight: 'bold', color: '#111', textAlign: 'center', marginBottom: hp(1) },
-  description: {
-    fontSize: moderateScale(14),
-    color: '#555',
+  brand: {
+    fontSize: moderateScale(38),
+    fontWeight: 'bold',
+    color: '#0A3B7C',
+    marginBottom: 8,
     textAlign: 'center',
-    lineHeight: moderateScale(21),
-    marginBottom: hp(1.2),
-    paddingHorizontal: wp(5),
   },
-  imageContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%', zIndex: 10 },
-  trolley: { width: wp(isTablet ? 50 : 85), height: wp(isTablet ? 50 : 85) },
-  swipeWrap: { paddingBottom: hp(6), width: '100%', alignItems: 'center', paddingHorizontal: wp(5) },
+  subtitle: {
+    fontSize: moderateScale(18),
+    fontWeight: '800',
+    color: '#111',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  description: {
+    fontSize: moderateScale(13),
+    color: '#444',
+    textAlign: 'center',
+    lineHeight: moderateScale(20),
+  },
+
+  // Trolley image spanning the colour split
+  trolley: {
+    position: 'absolute',
+    top: TROLLEY_TOP,
+    left: (width - TROLLEY_SIZE) / 2,
+    width: TROLLEY_SIZE,
+    height: TROLLEY_SIZE,
+    zIndex: 5,
+  },
+
+  // Swipe button pinned to the bottom
+  swipeWrap: {
+    position: 'absolute',
+    bottom: height * 0.05,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingHorizontal: width * 0.08,
+    zIndex: 10,
+  },
 });
