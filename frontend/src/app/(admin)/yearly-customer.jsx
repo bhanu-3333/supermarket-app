@@ -182,24 +182,26 @@ export default function YearlyCustomerScreen() {
           ) : chartData.length === 0 ? (
             <Text style={styles.emptyText}>No customer data available</Text>
           ) : (
-            <BarChart
-              data={chartData}
-              width={wp(78)}
-              height={hp(28)}
-              barWidth={wp(10)}
-              spacing={wp(8)}
-              roundedTop
-              hideRules={false}
-              rulesType="dashed"
-              rulesColor="#e5e7eb"
-              xAxisThickness={0}
-              yAxisThickness={0}
-              yAxisTextStyle={{ color: '#9CA3AF', fontSize: moderateScale(9) }}
-              noOfSections={3}
-              maxValue={maxVal}
-              backgroundColor="#fff"
-              barBorderRadius={4}
-            />
+            <View style={{ overflow: 'hidden' }}>
+              <BarChart
+                data={chartData}
+                width={wp(72)}
+                height={hp(28)}
+                barWidth={wp(10)}
+                spacing={wp(8)}
+                roundedTop
+                hideRules={false}
+                rulesType="dashed"
+                rulesColor="#e5e7eb"
+                xAxisThickness={0}
+                yAxisThickness={0}
+                yAxisTextStyle={{ color: '#9CA3AF', fontSize: moderateScale(9) }}
+                noOfSections={3}
+                maxValue={maxVal}
+                backgroundColor="#fff"
+                barBorderRadius={4}
+              />
+            </View>
           )}
         </View>
 
@@ -236,7 +238,7 @@ const styles = StyleSheet.create({
   dateSelector: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: moderateScale(25), paddingHorizontal: wp(4), paddingVertical: hp(1.5), gap: wp(2), elevation: 1, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
   dateSelectorText: { fontSize: moderateScale(14), color: '#666' },
   filterIcon: { width: wp(12), justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', borderRadius: moderateScale(12), elevation: 1, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
-  chartCard: { backgroundColor: '#fff', borderRadius: moderateScale(16), padding: wp(4), marginBottom: hp(2), elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
+  chartCard: { backgroundColor: '#fff', borderRadius: moderateScale(16), padding: wp(4), marginBottom: hp(2), elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, overflow: 'hidden' },
   chartTitle: { fontSize: moderateScale(15), fontWeight: 'bold', color: '#111827', marginBottom: hp(2) },
   loader: { marginVertical: hp(5) },
   emptyText: { color: '#9ca3af', fontSize: moderateScale(14), textAlign: 'center', paddingVertical: hp(3) },
