@@ -28,7 +28,8 @@ export default function PaymentSuccessScreen() {
         price: item.price,
         weight: item.weight,
       }));
-      await api.post(
+      console.log('[ORDER] Creating order for user:', user?.email, '| phone:', user?.phone);
+      const response = await api.post(
         '/orders',
         {
           orderItems,
@@ -39,8 +40,9 @@ export default function PaymentSuccessScreen() {
         },
         { headers: { Authorization: `Bearer ${user?.token}` } }
       );
+      console.log('[ORDER] Created successfully:', response.data?.data?._id);
     } catch (err) {
-      console.error('Order creation error:', err);
+      console.error('[ORDER] Creation error:', err.response?.status, err.response?.data || err.message);
     }
   };
 
