@@ -2,41 +2,41 @@ import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAuth } from '../context/AuthContext';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import SwipeButton from '../components/SwipeButton';
 import { moderateScale } from '../utils/responsive';
 
 const { width, height } = Dimensions.get('window');
 
-// Layout constants
-const TOP_HEIGHT = height * 0.33;      // light section height
-const BOTTOM_HEIGHT = height * 0.67;   // blue section height
-const TROLLEY_SIZE = width * 0.88;
-const TROLLEY_TOP = height * 0.25;     // trolley starts here (overlaps the split)
-
 export default function WelcomeScreen() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) {
-      if (user.role === 'admin') router.replace('/(admin)');
-      else if (user.role === 'staff') router.replace('/(staff)');
-      else router.replace('/(customer)');
+    if (!loading && !initialCheckDone) {
+      setInitialCheckDone(true);
+      if (user) {
+        if (user.role === 'admin') router.replace('/(admin)');
+        else if (user.role === 'staff') router.replace('/(staff)');
+        else router.replace('/(customer)');
+      }
     }
-  }, [user, loading]);
+  }, [loading]);
 
-  if (loading || user) return null;
+  if (loading) return null;
+  if (!initialCheckDone && user) return null;
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      {/* ── Light blue top ── */}
-      <View style={styles.topBg} />
 
-      {/* ── Dark blue bottom with diagonal top edge ── */}
-      <View style={styles.bottomBg} />
+      {/* Full light blue background */}
+      <View style={StyleSheet.absoluteFill} />
 
-      {/* ── Text content (sits in the light section) ── */}
+      {/* The diagonal blue parallelogram — goes from mid-left to lower-right */}
+      <View style={styles.parallelogram} />
+
+      {/* Text at top */}
       <View style={styles.textBlock}>
         <Text style={styles.brand}>SmartCart</Text>
         <Text style={styles.subtitle}>Scan. Shop. Skip the Line.</Text>
@@ -45,17 +45,18 @@ export default function WelcomeScreen() {
         </Text>
       </View>
 
-      {/* ── Trolley (overlaps the divider) ── */}
+      {/* Trolley — large, centered */}
       <Image
         source={require('../../assets/images/trolly.png')}
         style={styles.trolley}
         resizeMode="contain"
       />
 
-      {/* ── Swipe button ── */}
+      {/* Swipe button */}
       <View style={styles.swipeWrap}>
         <SwipeButton onSwipeSuccess={() => router.push('/(auth)/login')} label="Swipe now" />
       </View>
+
     </GestureHandlerRootView>
   );
 }
@@ -63,53 +64,42 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#C8DFF0',
+    backgroundColor: '#C8DDF0',   // light blue base
   },
 
-  // Light blue top panel
-  topBg: {
+  // Single diagonal blue shape — smaller size, positioned in middle
+  parallelogram: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: TOP_HEIGHT + 60,          // extra so diagonal doesn't show gap
-    backgroundColor: '#C8DFF0',
+    width: width * 1.4,
+    height: height * 0.5,
+    backgroundColor: '#4880C8',   // medium-dark blue
+    top: height * 0.25,
+    left: -width * 0.2,
+    transform: [{ rotate: '-15deg' }],
+    zIndex: 1,
   },
 
-  // Darker blue bottom — uses a large border-radius on top to fake the diagonal curve
-  bottomBg: {
-    position: 'absolute',
-    bottom: 0,
-    left: -width * 0.15,
-    right: -width * 0.15,
-    top: TOP_HEIGHT - 20,
-    backgroundColor: '#3D7CC9',
-    borderTopLeftRadius: width,
-    borderTopRightRadius: width,
-  },
-
-  // Text sits at the top
+  // Text block — top of screen, more space
   textBlock: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: TOP_HEIGHT,
+    paddingTop: height * 0.08,
+    paddingHorizontal: width * 0.08,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: height * 0.06,
-    paddingHorizontal: width * 0.1,
-    zIndex: 2,
+    zIndex: 5,
+    height: height * 0.25,
   },
   brand: {
-    fontSize: moderateScale(38),
+    fontSize: moderateScale(42),
     fontWeight: 'bold',
     color: '#0A3B7C',
-    marginBottom: 8,
+    marginBottom: 6,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(19),
     fontWeight: '800',
     color: '#111',
     textAlign: 'center',
@@ -119,27 +109,27 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(13),
     color: '#444',
     textAlign: 'center',
-    lineHeight: moderateScale(20),
+    lineHeight: moderateScale(21),
   },
 
-  // Trolley image spanning the colour split
+  // Trolley — larger size, positioned to give more space below for button
   trolley: {
     position: 'absolute',
-    top: TROLLEY_TOP,
-    left: (width - TROLLEY_SIZE) / 2,
-    width: TROLLEY_SIZE,
-    height: TROLLEY_SIZE,
-    zIndex: 5,
+    width: width * 1.0,
+    height: width * 1.0,
+    left: 0,
+    top: height * 0.32,
+    zIndex: 8,
   },
 
-  // Swipe button pinned to the bottom
+  // Swipe button — more space from bottom, reduced padding
   swipeWrap: {
     position: 'absolute',
-    bottom: height * 0.05,
+    bottom: height * 0.08,
     left: 0,
     right: 0,
     alignItems: 'center',
-    paddingHorizontal: width * 0.08,
+    paddingHorizontal: width * 0.05,
     zIndex: 10,
   },
 });
