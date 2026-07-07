@@ -11,13 +11,11 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
-  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useToast } from '../../context/ToastContext';
 import api from '../../utils/api';
-
-const { width, height } = Dimensions.get('window');
+import { wp, hp, moderateScale, isSmallDevice, isTablet } from '../../utils/responsive';
 
 export default function RegisterCustomerScreen() {
   const router = useRouter();
@@ -183,12 +181,12 @@ export default function RegisterCustomerScreen() {
             autoCapitalize="characters"
           />
           {storeVerified === 'invalid' && (
-            <Text style={{ color: 'red', marginTop: -14, marginBottom: 10, marginLeft: 8, fontSize: 12 }}>
+            <Text style={{ color: 'red', marginTop: hp(-1.8), marginBottom: hp(1.2), marginLeft: wp(2), fontSize: moderateScale(10) }}>
               Invalid store code
             </Text>
           )}
           {storeVerified && storeVerified !== 'invalid' && (
-            <Text style={{ color: '#10b981', marginTop: -14, marginBottom: 10, marginLeft: 8, fontSize: 12 }}>
+            <Text style={{ color: '#10b981', marginTop: hp(-1.8), marginBottom: hp(1.2), marginLeft: wp(2), fontSize: moderateScale(10) }}>
               ✓ {storeVerified.name}
             </Text>
           )}
@@ -228,55 +226,58 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    width: width * 0.7,
-    height: width * 0.7,
-    marginTop: -(width * 0.7 / 2),
-    marginLeft: -(width * 0.7 / 2),
+    width: wp(isSmallDevice ? 110 : 120),
+    height: wp(isSmallDevice ? 110 : 120),
+    marginTop: -(wp(isSmallDevice ? 110 : 120) / 2),
+    marginLeft: -(wp(isSmallDevice ? 110 : 120) / 2),
     opacity: 0.15,
     zIndex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: width * 0.08,
+    paddingHorizontal: wp(8),
     justifyContent: 'center',
-    paddingTop: height * 0.08,
-    paddingBottom: 40,
+    paddingTop: hp(8),
+    paddingBottom: hp(5),
     zIndex: 2,
+    maxWidth: isTablet ? 500 : '100%',
+    alignSelf: 'center',
+    width: '100%',
   },
   brandTitle: {
-    fontSize: Math.min(width * 0.1, 40),
+    fontSize: moderateScale(isSmallDevice ? 32 : 40),
     fontWeight: 'bold',
     color: '#0A3B7C',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: hp(1.2),
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: moderateScale(isSmallDevice ? 16 : 18),
     fontWeight: '600',
     color: '#333',
     textAlign: 'center',
-    marginBottom: height * 0.03,
+    marginBottom: hp(3),
   },
   formContainer: {
     width: '100%',
     zIndex: 10,
   },
   label: {
-    fontSize: 14,
+    fontSize: moderateScale(isSmallDevice ? 12 : 14),
     fontWeight: '600',
     color: '#111',
-    marginBottom: 8,
-    marginLeft: 4,
+    marginBottom: hp(1),
+    marginLeft: wp(1),
   },
   input: {
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 25,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    fontSize: 14,
-    marginBottom: 20,
+    borderRadius: moderateScale(25),
+    paddingHorizontal: wp(5),
+    paddingVertical: hp(isSmallDevice ? 1.5 : 1.8),
+    fontSize: moderateScale(isSmallDevice ? 12 : 14),
+    marginBottom: hp(2),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -285,10 +286,10 @@ const styles = StyleSheet.create({
   },
   signUpButton: {
     backgroundColor: '#123F7A',
-    borderRadius: 25,
-    paddingVertical: 15,
+    borderRadius: moderateScale(25),
+    paddingVertical: hp(isSmallDevice ? 1.5 : 1.8),
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: hp(1.2),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -297,25 +298,26 @@ const styles = StyleSheet.create({
   },
   signUpButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: moderateScale(isSmallDevice ? 14 : 16),
     fontWeight: '600',
   },
   errorText: {
     color: 'red',
-    marginBottom: 10,
+    marginBottom: hp(1.2),
     textAlign: 'center',
-    fontSize: 14,
+    fontSize: moderateScale(isSmallDevice ? 12 : 14),
   },
   spacer: {
     flex: 1,
-    minHeight: 20,
+    minHeight: hp(2.5),
   },
   loginLinkContainer: {
     alignItems: 'center',
+    paddingBottom: hp(2),
   },
   loginLinkText: {
     color: '#123F7A',
-    fontSize: 12,
+    fontSize: moderateScale(isSmallDevice ? 10 : 12),
     fontWeight: '600',
     letterSpacing: 0.5,
   },
