@@ -1,12 +1,10 @@
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 import SwipeButton from '../components/SwipeButton';
-import { moderateScale } from '../utils/responsive';
-
-const { width, height } = Dimensions.get('window');
+import { moderateScale, wp, hp, verticalScale, isSmallDevice } from '../utils/responsive';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -67,69 +65,70 @@ const styles = StyleSheet.create({
     backgroundColor: '#C8DDF0',   // light blue base
   },
 
-  // Single diagonal blue shape — smaller size, positioned in middle
+  // Single diagonal blue shape — responsive for all screen sizes
   parallelogram: {
     position: 'absolute',
-    width: width * 1.4,
-    height: height * 0.5,
+    width: wp(140),
+    height: hp(isSmallDevice ? 45 : 50),
     backgroundColor: '#4880C8',   // medium-dark blue
-    top: height * 0.25,
-    left: -width * 0.2,
+    top: hp(isSmallDevice ? 22 : 25),
+    left: wp(-20),
     transform: [{ rotate: '-15deg' }],
     zIndex: 1,
   },
 
-  // Text block — top of screen, more space
+  // Text block — more space at top, smaller height
   textBlock: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    paddingTop: height * 0.08,
-    paddingHorizontal: width * 0.08,
+    paddingTop: hp(isSmallDevice ? 10 : 12),
+    paddingHorizontal: wp(8),
     alignItems: 'center',
     zIndex: 5,
-    height: height * 0.25,
+    height: hp(isSmallDevice ? 20 : 22),
   },
   brand: {
-    fontSize: moderateScale(42),
+    fontSize: moderateScale(isSmallDevice ? 36 : 42),
     fontWeight: 'bold',
     color: '#0A3B7C',
-    marginBottom: 6,
+    marginBottom: verticalScale(6),
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: moderateScale(19),
+    fontSize: moderateScale(isSmallDevice ? 16 : 19),
     fontWeight: '800',
     color: '#111',
     textAlign: 'center',
-    marginBottom: 6,
+    marginBottom: verticalScale(6),
   },
   description: {
-    fontSize: moderateScale(13),
+    fontSize: moderateScale(isSmallDevice ? 11 : 13),
     color: '#444',
     textAlign: 'center',
-    lineHeight: moderateScale(21),
+    lineHeight: moderateScale(isSmallDevice ? 18 : 21),
+    paddingHorizontal: wp(2),
   },
 
-  // Trolley — larger size, positioned to give more space below for button
+  // Trolley — bigger size, moved up higher
   trolley: {
     position: 'absolute',
-    width: width * 1.0,
-    height: width * 1.0,
-    left: 0,
-    top: height * 0.32,
+    width: wp(isSmallDevice ? 110 : 120),
+    height: wp(isSmallDevice ? 110 : 120),
+    left: wp(isSmallDevice ? -5 : -10),
+    top: hp(isSmallDevice ? 30 : 32),
     zIndex: 8,
   },
 
-  // Swipe button — more space from bottom, reduced padding
+  // Swipe button — closer to trolley, less bottom space
   swipeWrap: {
     position: 'absolute',
-    bottom: height * 0.08,
+    bottom: hp(isSmallDevice ? 4 : 5),
     left: 0,
     right: 0,
     alignItems: 'center',
-    paddingHorizontal: width * 0.05,
+    paddingHorizontal: wp(5),
     zIndex: 10,
   },
 });
