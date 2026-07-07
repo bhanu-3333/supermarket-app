@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-
-const { width, height } = Dimensions.get('window');
+import { wp, hp, moderateScale, isSmallDevice, isTablet } from '../../utils/responsive';
 
 export default function AccountTypeScreen() {
   const router = useRouter();
@@ -59,40 +58,50 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F7FA' },
   topImage: {
     position: 'absolute',
-    top: -60,
-    right: -60,
-    width: width * 0.5,
-    height: width * 0.5,
+    top: hp(-8),
+    right: wp(-15),
+    width: wp(50),
+    height: wp(50),
     opacity: 0.35,
   },
   bottomImage: {
     position: 'absolute',
-    bottom: -60,
-    left: -60,
-    width: width * 0.5,
-    height: width * 0.5,
+    bottom: hp(-8),
+    left: wp(-15),
+    width: wp(50),
+    height: wp(50),
     opacity: 0.35,
   },
-  content: { flex: 1, paddingHorizontal: width * 0.08, justifyContent: 'center' },
+  content: { 
+    flex: 1, 
+    paddingHorizontal: wp(8), 
+    justifyContent: 'center',
+    maxWidth: isTablet ? 500 : '100%',
+    alignSelf: 'center',
+    width: '100%',
+  },
   brandTitle: {
-    fontSize: Math.min(width * 0.1, 40),
+    fontSize: moderateScale(isSmallDevice ? 32 : 40),
     fontWeight: 'bold',
     color: '#0A3B7C',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: hp(isSmallDevice ? 1 : 1.5),
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: moderateScale(isSmallDevice ? 16 : 18),
     fontWeight: '600',
     color: '#333',
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: hp(isSmallDevice ? 4 : 5),
   },
-  cardsContainer: { gap: 20, marginBottom: 40 },
+  cardsContainer: { 
+    gap: hp(2.5), 
+    marginBottom: hp(isSmallDevice ? 4 : 5) 
+  },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: moderateScale(20),
+    padding: wp(6),
     alignItems: 'center',
     elevation: 3,
     shadowColor: '#000',
@@ -100,18 +109,31 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  cardIcon: { fontSize: 48, marginBottom: 12 },
+  cardIcon: { 
+    fontSize: moderateScale(isSmallDevice ? 40 : 48), 
+    marginBottom: hp(1.5) 
+  },
   cardTitle: {
-    fontSize: 18,
+    fontSize: moderateScale(isSmallDevice ? 16 : 18),
     fontWeight: 'bold',
     color: '#0A3B7C',
-    marginBottom: 8,
+    marginBottom: hp(1),
+    textAlign: 'center',
   },
-  cardDesc: { fontSize: 14, color: '#666', textAlign: 'center' },
-  backLink: { alignItems: 'center', marginTop: 20 },
+  cardDesc: { 
+    fontSize: moderateScale(isSmallDevice ? 12 : 14), 
+    color: '#666', 
+    textAlign: 'center',
+    paddingHorizontal: wp(2),
+  },
+  backLink: { 
+    alignItems: 'center', 
+    marginTop: hp(2),
+    paddingBottom: hp(3),
+  },
   backLinkText: {
     color: '#123F7A',
-    fontSize: 12,
+    fontSize: moderateScale(isSmallDevice ? 10 : 12),
     fontWeight: '600',
     letterSpacing: 0.5,
   },
