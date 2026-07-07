@@ -45,12 +45,6 @@ export default function CustomerProfile() {
 
   const menuItems = [
     {
-      icon: 'person-outline',
-      title: 'Profile',
-      subtitle: 'View your profile here',
-      onPress: () => {},
-    },
-    {
       icon: 'receipt-outline',
       title: 'Order History',
       subtitle: 'View your past orders',
@@ -80,7 +74,7 @@ export default function CustomerProfile() {
     <View style={styles.container}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + hp(1.5) }]}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + hp(1.5), paddingBottom: insets.bottom + hp(12) }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
@@ -175,7 +169,6 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   content: {
     padding: wp(5),
-    paddingBottom: hp(12),
     maxWidth: isTablet ? 600 : '100%',
     alignSelf: 'center',
     width: '100%',
