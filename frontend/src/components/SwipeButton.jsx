@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
@@ -9,10 +9,11 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { wp, hp, moderateScale, isSmallDevice } from '../utils/responsive';
 
-const BUTTON_WIDTH = Dimensions.get('window').width - 60;
-const BUTTON_HEIGHT = 64;
-const PADDING = 5;
+const BUTTON_WIDTH = wp(86);
+const BUTTON_HEIGHT = hp(isSmallDevice ? 7 : 8);
+const PADDING = wp(1);
 const THUMB_SIZE = BUTTON_HEIGHT - 2 * PADDING;
 const SWIPE_RANGE = BUTTON_WIDTH - 2 * PADDING - THUMB_SIZE;
 
@@ -50,7 +51,7 @@ export default function SwipeButton({ onSwipeSuccess, label = 'Swipe to get star
       <Animated.Text style={[styles.label, textStyle]}>{label}</Animated.Text>
       <GestureDetector gesture={pan}>
         <Animated.View style={[styles.thumb, thumbStyle]}>
-          <Ionicons name={done ? 'checkmark' : 'arrow-forward'} size={26} color="#fff" />
+          <Ionicons name={done ? 'checkmark' : 'arrow-forward'} size={moderateScale(isSmallDevice ? 22 : 26)} color="#fff" />
         </Animated.View>
       </GestureDetector>
     </View>
@@ -70,7 +71,7 @@ const styles = StyleSheet.create({
   label: {
     position: 'absolute',
     color: '#1a4c8c',
-    fontSize: 15,
+    fontSize: moderateScale(isSmallDevice ? 13 : 15),
     fontWeight: '600',
     letterSpacing: 0.3,
   },
