@@ -130,9 +130,9 @@ export default function AdminSales() {
   const renderOrderCard = (order) => (
     <View key={order._id} style={styles.orderCard}>
       <View style={styles.orderLeft}>
-        <Text style={styles.orderIdLabel}>OrderID :</Text>
-        <Text style={styles.orderId} numberOfLines={1}>
-          {order._id}
+        <Text style={styles.customerNameLabel}>Customer :</Text>
+        <Text style={styles.customerName}>
+          {order.user?.name || 'Unknown Customer'}
         </Text>
         <Text style={styles.orderDateTime}>
           {formatDate(new Date(order.createdAt))}  {formatTime(order.createdAt)}
@@ -458,15 +458,15 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: wp(2),
   },
-  orderIdLabel: {
+  customerNameLabel: {
     fontSize: moderateScale(10),
     color: '#9ca3af',
     marginBottom: hp(0.3),
   },
-  orderId: {
-    fontSize: moderateScale(11),
+  customerName: {
+    fontSize: moderateScale(15),
     color: '#111827',
-    fontWeight: '500',
+    fontWeight: '700',
     marginBottom: hp(0.8),
   },
   orderDateTime: {
