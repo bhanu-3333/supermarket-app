@@ -3,6 +3,11 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
+// Polyfill crypto for Node.js compatibility
+if (typeof globalThis.crypto === 'undefined') {
+  globalThis.crypto = require('crypto');
+}
+
 // Load env vars
 dotenv.config();
 
