@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "SmartCart",
-    "slug": "smartcart",
+    "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -45,12 +45,8 @@
         {
           "cameraPermission": "Allow SmartCart to access your camera for barcode scanning."
         }
-      ],
-      "@react-native-community/datetimepicker"
+      ]
     ],
-    "experiments": {
-      "typedRoutes": true
-    },
     "extra": {
       "router": {},
       "eas": {
