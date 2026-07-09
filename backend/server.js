@@ -73,7 +73,7 @@ app.use('/api/cart', cartRouter);
 app.use('/api/customer', customerRouter);
 app.use('/api/admin', adminRouter);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 // Listen on 0.0.0.0 to accept connections from any network interface
 // This allows mobile devices on the same network to connect
