@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": true,*/U
       "bundleIdentifier": "com.smartcart.app"
     },
     "android": {
