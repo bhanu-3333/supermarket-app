@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // API Configuration for different environments
 const getApiUrl = () => {
   // For production APK, use your actual server IP
-  const PRODUCTION_API_URL = 'https://supermarket-app-production-d211.up.railway.app/api';
+  const PRODUCTION_API_URL = 'https://supermarket-app-znw5.onrender.com/api';
   
   // For development
   if (__DEV__) {
