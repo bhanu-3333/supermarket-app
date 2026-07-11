@@ -10,7 +10,7 @@ function RouterRegistrar() {
 
   useEffect(() => {
     setRouter(router);
-  }, []);
+  }, [router]);
 
   return null;
 }
@@ -30,8 +30,10 @@ function AuthGuard() {
       segments[0] === '(customer)';
 
     if (!user && inProtectedRoute) {
-      console.log('[AuthGuard] No user on protected route — redirecting to /');
-      router.replace('/');
+      setTimeout(() => {
+        try { router.dismissAll(); } catch (_) {}
+        router.replace('/');
+      }, 0);
     }
   }, [user, loading, segments]);
 
