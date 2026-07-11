@@ -16,6 +16,7 @@ import { useRouter } from 'expo-router';
 import { useToast } from '../../context/ToastContext';
 import api from '../../utils/api';
 import { wp, hp, moderateScale, isSmallDevice, isTablet } from '../../utils/responsive';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleRegister = async () => {
     if (!companyName || !ownerName || !email || !password) {
@@ -100,6 +102,7 @@ export default function RegisterScreen() {
         source={require('../../../assets/images/trolly.png')}
         style={styles.trolleyWatermark}
         resizeMode="contain"
+        pointerEvents="none"
       />
 
       <ScrollView 
@@ -139,14 +142,19 @@ export default function RegisterScreen() {
           />
 
           <Text style={styles.label}>Password :</Text>
-          <TextInput 
-            style={styles.input}
-            placeholder="eg : 28398492"
-            placeholderTextColor="#999"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput 
+              style={styles.passwordInput}
+              placeholder="eg : 28398492"
+              placeholderTextColor="#999"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+              <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color="#888" />
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity 
             style={styles.signUpButton} 
@@ -188,7 +196,6 @@ const styles = StyleSheet.create({
     marginTop: -(wp(isSmallDevice ? 110 : 120) / 2),
     marginLeft: -(wp(isSmallDevice ? 110 : 120) / 2),
     opacity: 0.15,
-    zIndex: 1,
   },
   scrollContent: {
     flexGrow: 1,
@@ -196,7 +203,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: hp(8),
     paddingBottom: hp(5),
-    zIndex: 2,
     maxWidth: isTablet ? 500 : '100%',
     alignSelf: 'center',
     width: '100%',
@@ -210,7 +216,6 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     width: '100%',
-    zIndex: 10,
   },
   label: {
     fontSize: moderateScale(isSmallDevice ? 12 : 14),
@@ -233,6 +238,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 2,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: moderateScale(25),
+    marginBottom: hp(2),
+    paddingHorizontal: wp(5),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: hp(isSmallDevice ? 1.5 : 1.8),
+    fontSize: moderateScale(isSmallDevice ? 12 : 14),
+    color: '#111',
+  },
+  eyeIcon: {
+    padding: wp(2),
   },
   signUpButton: {
     backgroundColor: '#123F7A',
