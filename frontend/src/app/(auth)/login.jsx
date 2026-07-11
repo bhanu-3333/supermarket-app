@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import api from '../../utils/api';
 import { wp, hp, moderateScale, isSmallDevice, isTablet } from '../../utils/responsive';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -86,6 +88,7 @@ export default function LoginScreen() {
         source={require('../../../assets/images/trolly.png')}
         style={styles.trolleyWatermark}
         resizeMode="contain"
+        pointerEvents="none"
       />
       
       <View style={styles.content}>
@@ -103,14 +106,19 @@ export default function LoginScreen() {
             keyboardType="email-address"
           />
           <Text style={styles.label}>Password :</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="••••••••"
-            placeholderTextColor="#999"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="••••••••"
+              placeholderTextColor="#999"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+              <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={20} color="#888" />
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={isLoading}>
             {isLoading
               ? <ActivityIndicator color="#fff" />
@@ -145,7 +153,6 @@ const styles = StyleSheet.create({
     marginTop: -(wp(isSmallDevice ? 110 : 120) / 2),
     marginLeft: -(wp(isSmallDevice ? 110 : 120) / 2),
     opacity: 0.15,
-    zIndex: 1,
   },
   content: { 
     flex: 1, 
@@ -174,6 +181,25 @@ const styles = StyleSheet.create({
     paddingVertical: hp(1.8), 
     fontSize: moderateScale(14), 
     marginBottom: hp(2.5) 
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: moderateScale(25),
+    marginBottom: hp(2.5),
+    paddingHorizontal: wp(5),
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: hp(1.8),
+    fontSize: moderateScale(14),
+    color: '#111',
+  },
+  eyeIcon: {
+    padding: wp(2),
   },
   loginButton: { 
     backgroundColor: '#123F7A', 
