@@ -38,4 +38,4 @@ readme
   <img src="assets/images/output/admin/O1.png" width="250"/>
   <img src="assets/images/output/admin/O2.png" width="250"/>
   <img src="assets/images/output/admin/O3.png" width="250"/>
-</p>
+</p
